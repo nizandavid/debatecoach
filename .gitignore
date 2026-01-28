@@ -1,0 +1,18 @@
+# Environment variables
+.env
+
+# Dependencies
+node_modules/
+
+# Temporary files
+tmp/
+*.log
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

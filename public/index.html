@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DebateCoach - Practice Debate with AI</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo-section">
+        <div class="logo"><img src="debate_logo.png" alt="DebateCoach Logo" /></div>
+        <div>
+          <div class="title">DebateCoach</div>
+          <div class="subtitle">Practice debate with AI • Improve your English</div>
+        </div>
+      </div>
+      <div class="timer-section">
+        <button class="btn btn-secondary" id="settingsBtn">⚙️ Settings</button>
+        <div id="timerSection" class="hidden">
+          <div class="timer-display" id="timerDisplay">5:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WELCOME MESSAGE (shown when no session) -->
+    <div id="welcomeSection">
+      <div class="card" style="text-align: center; padding: 60px 32px;">
+        <div style="margin-bottom: 24px;"><img src="debate_logo.png" alt="DebateCoach Logo" style="width: 100px; height: 66px;" /></div>
+        <h2 style="font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 16px;">Welcome to DebateCoach</h2>
+        <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 32px;">
+          Practice debate with AI and improve your English speaking skills
+        </p>
+        <button class="btn btn-primary" id="openSetupBtn" style="font-size: 18px; padding: 16px 32px;">⚙️ Setup New Debate Session</button>
+      </div>
+    </div>
+
+    <!-- DEBATE TOPIC DISPLAY (shown during debate) -->
+    <div id="debateTopicDisplay" class="debate-topic hidden">
+      <div class="debate-topic-label">🎯 Debate Motion</div>
+      <div class="debate-topic-text" id="currentTopicText"></div>
+    </div>
+
+    <!-- DEBATE CONVERSATION -->
+    <div id="conversationSection" class="debate-conversation hidden"></div>
+
+    <!-- ACTION BUTTONS (shown during debate / end) -->
+    <div id="resetSection" class="hidden" style="text-align: center; margin-top: 16px;">
+      <button class="btn btn-warning" id="resetBtn">🔄 Reset Session</button>
+      <button class="btn btn-danger" id="endDebateBtn">🏁 End Debate & Get Feedback</button>
+      <button class="btn btn-primary hidden" id="switchSidesBtn">🔁 Switch Sides</button>
+      <button class="btn btn-secondary hidden" id="continueDebateBtn">▶️ Continue</button>
+    </div>
+
+    <!-- INPUT SECTION (shown when it's student's turn) -->
+    <div id="inputSection" class="input-section hidden">
+      <div class="card-title">✍️ Your Turn</div>
+
+      <div class="input-controls">
+        <button class="btn btn-danger" id="recordBtn">🎤 Record</button>
+        <button class="btn btn-secondary" id="stopRecordBtn" disabled>⏹️ Stop</button>
+        <button class="btn btn-info" id="typeBtn">⌨️ Type Instead</button>
+      </div>
+
+      <div class="transcript-display empty" id="transcriptDisplay">Your transcript will appear here...</div>
+
+      <textarea class="textarea hidden" id="manualInput" placeholder="Type your argument here..."></textarea>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+        <button class="btn btn-success" id="sendBtn" style="flex: 1;">📤 I'm Done - Send</button>
+        <button class="btn btn-danger" id="endSessionBtn">🏁 End Session</button>
+      </div>
+    </div>
+
+    <!-- FEEDBACK SECTION (shown after user requests feedback) -->
+    <div id="feedbackSection" class="card hidden" style="margin-top: 16px;">
+      <div class="card-title">🎓 Teacher's Feedback</div>
+
+      <div class="feedback-tabs">
+        <button class="tab active" data-mode="short">📝 Quick Summary</button>
+        <button class="tab" data-mode="detailed">📚 Detailed Analysis</button>
+      </div>
+
+      <div class="feedback-content" id="feedbackContent">Click a tab to generate feedback...</div>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px;">
+        <button class="btn btn-primary" id="downloadFeedbackBtn">💾 Save Report</button>
+        <button class="btn btn-secondary" id="printFeedbackBtn">🖨️ Print</button>
+        <button class="btn btn-success" id="newSessionBtn">🔄 New Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">⚙️ Setup Debate Session</div>
+        <button class="close-modal" id="closeModalBtn">×</button>
+      </div>
+
+      <div class="accordion">
+        <!-- 1) Setup -->
+        <div class="acc-item open" id="accItemSetup">
+          <button type="button" class="acc-header" data-acc="accSetup">
+            <span>🎯 Setup</span>
+            <span class="acc-chevron">▾</span>
+          </button>
+
+          <div class="acc-body" id="accSetup">
+            <div class="settings-row">
+              <div class="form-group">
+                <label class="form-label">Your Side</label>
+                <select class="form-select" id="stanceSelect">
+                  <option value="PRO">PRO (For) ⭐ PRO starts first</option>
+                  <option value="CON">CON (Against)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Difficulty</label>
+                <select class="form-select" id="difficultySelect">
+                  <option value="Easy">Easy</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-row" style="margin-top: 14px;">
+              <div class="form-group">
+                <label class="form-label">Mode</label>
+                <select class="form-select" id="modeSelect">
+                  <option value="practice">💪 Practice (No time limit)</option>
+                  <option value="competition">🎯 Competition</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Minutes per turn (Competition)</label>
+                <div class="minutes-radio" id="minutesRadio">
+                  <label><input type="radio" name="turnMinutes" value="1"> 1</label>
+                  <label><input type="radio" name="turnMinutes" value="2"> 2</label>
+                  <label><input type="radio" name="turnMinutes" value="3"> 3</label>
+                  <label><input type="radio" name="turnMinutes" value="4"> 4</label>
+                  <label><input type="radio" name="turnMinutes" value="5" checked> 5</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2) Topic -->
+        <div class="acc-item">
+          <button type="button" class="acc-header" data-acc="accTopic">
+            <span>💡 Topic</span>
+            <span class="acc-chevron">▾</span>
+          </button>
+
+          <div class="acc-body hidden" id="accTopic">
+            <div class="form-group">
+              <label class="form-label">Debate Topic</label>
+              <input type="text" class="form-input topic-input" id="topicInput"
+                     placeholder="Enter debate topic or click Suggest Topics..." />
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top: 12px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="suggestTopicsBtn">💡 Suggest Topics</button>
+            </div>
+
+            <div id="topicsListWrapper" class="hidden" style="margin-top: 12px;">
+              <div class="form-label" style="margin-bottom: 8px;">Choose a suggested topic</div>
+              <select class="form-select" id="topicsSelect"></select>
+              <div style="display:flex; gap:12px; margin-top: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="hideTopicsBtn">✖ Hide</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3) Voice -->
+        <div class="acc-item">
+          <button type="button" class="acc-header" data-acc="accVoice">
+            <span>🔊 Voice</span>
+            <span class="acc-chevron">▾</span>
+          </button>
+
+          <div class="acc-body hidden" id="accVoice">
+            <div class="settings-row">
+              <div class="form-group">
+                <label class="form-label">Auto-speak computer replies</label>
+                <select class="form-select" id="autoSpeakSelect">
+                  <option value="true" selected>On</option>
+                  <option value="false">Off</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Voice</label>
+                <select class="form-select" id="voiceSelect">
+                  <option value="">(default)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top: 12px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="testVoiceBtn">🔊 Test voice</button>
+              <button class="btn btn-secondary" id="stopSpeakingBtn">🔇 Stop Speaking</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin: 24px 0; border: none; border-top: 2px solid var(--border);" />
+
+      <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
+        <button class="btn btn-success" id="startSessionBtn" style="flex: 1;">▶️ Start Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
