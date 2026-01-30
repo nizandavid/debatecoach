@@ -61,6 +61,9 @@ D.hideTopicsBtn?.addEventListener("click", () => {
 D.startSessionBtn?.addEventListener("click", () => {
   unlockTTS(); // ✅ critical
   startSession(D, state);
+  // Make sure topic is displayed
+  D.debateTopicDisplay?.classList.remove('hidden');
+  D.currentTopicText.textContent = state.topic;
 });
 
 /* ---------- Input controls ---------- */
@@ -166,7 +169,6 @@ window.__unlockTTS = unlockTTS;
 window.__stop = stopSpeaking;
 window.__speak = (t) => {
   unlockTTS();
-  // אם speakText לא נגיש כאן, סימן שהוא לא מיוצא/מיובא נכון (נפתור מיד אחרי)
   if (typeof window.__internalSpeak === "function") return window.__internalSpeak(t);
   console.warn("__internalSpeak is missing (need to expose speakText from tts.js)");
 };
@@ -187,3 +189,239 @@ window.__DC.say = (t) => {
   }
 };
 console.log("✅ Debug hooks ready: __DC.say('hello')");
+
+// ============================================================
+// NEW FEATURES: Random Topics, Welcome Screen, Keyboard Shortcuts
+// ============================================================
+
+/* ---------- NEW: Random Topics ---------- */
+const DEFAULT_TOPICS = [
+  "Social media should be regulated by governments",
+  "Artificial intelligence poses more risks than benefits to society",
+  "Climate change is the most pressing issue of our time",
+  "Online education is as effective as traditional classroom learning",
+  "Privacy is more important than security in the digital age",
+  "Space exploration is a waste of resources",
+  "Animal testing should be banned worldwide",
+  "The voting age should be lowered to 16",
+  "Genetic engineering of humans should be allowed",
+  "Fast food companies should be held responsible for obesity"
+];
+
+function loadRandomTopic() {
+  const randomTopic = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
+  state.topic = randomTopic;
+  
+  // Update both displays
+  const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+  if (mainTopicDisplay) {
+    mainTopicDisplay.textContent = randomTopic;
+  }
+  if (D.topicInput) {
+    D.topicInput.value = randomTopic;
+  }
+  
+  console.log('Loaded random topic:', randomTopic);
+}
+
+// Load random topic on startup
+loadRandomTopic();
+
+/* ---------- NEW: Welcome Screen Listeners ---------- */
+
+// Start Debate button (new welcome screen)
+const startDebateBtn = document.getElementById('startDebateBtn');
+if (startDebateBtn) {
+  startDebateBtn.addEventListener('click', () => {
+    console.log('Start debate clicked');
+    unlockTTS();
+    
+    if (!state.topic || state.topic.trim().length < 5) {
+      import('./ui.js').then(({ showError }) => {
+        showError('Please enter a valid debate topic (at least 5 characters)');
+      });
+      return;
+    }
+    
+    // Close welcome and start session
+    D.welcomeSection?.classList.add('hidden');
+    
+    // Make sure topicInput has the value (flow.js needs it!)
+    if (D.topicInput) {
+      D.topicInput.value = state.topic;
+    }
+    
+    // Call startSession
+console.log('About to call startSession with topic:', state.topic);
+console.log('D.topicInput:', D.topicInput);
+startSession(D, state);
+console.log('startSession called!');
+    
+    // Make sure the topic is displayed
+    D.debateTopicDisplay?.classList.remove('hidden');
+    D.currentTopicText.textContent = state.topic;
+  });
+}
+
+// Edit topic button
+const editTopicBtn = document.getElementById('editTopicBtn');
+const topicInputWrapper = document.getElementById('topicInputWrapper');
+const mainTopicInput = document.getElementById('mainTopicInput');
+
+if (editTopicBtn) {
+  editTopicBtn.addEventListener('click', () => {
+    console.log('Edit topic clicked');
+    if (topicInputWrapper) {
+      topicInputWrapper.classList.remove('hidden');
+    }
+    if (mainTopicInput) {
+      mainTopicInput.value = state.topic;
+      mainTopicInput.focus();
+    }
+  });
+}
+
+// New topic button
+const newTopicBtn = document.getElementById('newTopicBtn');
+if (newTopicBtn) {
+  newTopicBtn.addEventListener('click', () => {
+    console.log('New topic clicked');
+    loadRandomTopic();
+    showToast(D, 'New topic loaded!', 'success');
+  });
+}
+
+// Save topic button
+const saveTopicBtn = document.getElementById('saveTopicBtn');
+if (saveTopicBtn) {
+  saveTopicBtn.addEventListener('click', () => {
+    const newTopic = mainTopicInput.value.trim();
+    if (newTopic.length < 5) {
+      import('./ui.js').then(({ showError }) => {
+        showError('Topic must be at least 5 characters long');
+      });
+      return;
+    }
+    state.topic = newTopic;
+    
+    const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+    if (mainTopicDisplay) {
+      mainTopicDisplay.textContent = newTopic;
+    }
+    if (D.topicInput) {
+      D.topicInput.value = newTopic;
+    }
+    if (topicInputWrapper) {
+      topicInputWrapper.classList.add('hidden');
+    }
+    showToast(D, 'Topic updated!', 'success');
+  });
+}
+
+// Suggest topics button (main screen)
+const suggestTopicsMainBtn = document.getElementById('suggestTopicsMainBtn');
+if (suggestTopicsMainBtn) {
+  suggestTopicsMainBtn.addEventListener('click', async () => {
+    console.log('Suggest topics clicked (main)');
+    unlockTTS();
+    
+    try {
+      // Fetch topics from API
+      const response = await fetch('/topics');
+      const data = await response.json();
+      
+      if (data.topics && data.topics.length > 0) {
+        // Fill the main screen dropdown
+        const topicsSelectMain = document.getElementById('topicsSelectMain');
+        if (topicsSelectMain) {
+          topicsSelectMain.innerHTML = '';
+          data.topics.forEach(topic => {
+            const option = document.createElement('option');
+            option.value = topic;
+            option.textContent = topic;
+            topicsSelectMain.appendChild(option);
+          });
+        }
+        
+        // Show the dropdown
+        const topicsListWrapperMain = document.getElementById('topicsListWrapperMain');
+        if (topicsListWrapperMain) {
+          topicsListWrapperMain.classList.remove('hidden');
+        }
+        
+        showToast(D, 'Topics loaded!', 'success');
+      }
+    } catch (err) {
+      console.error('Error fetching topics:', err);
+      showToast(D, 'Failed to load topics', 'error');
+    }
+  });
+}
+
+// Topics select (main screen) - when user picks a topic
+const topicsSelectMain = document.getElementById('topicsSelectMain');
+if (topicsSelectMain) {
+  topicsSelectMain.addEventListener('change', () => {
+    const val = topicsSelectMain.value;
+    if (val) {
+      // Update topic
+      state.topic = val;
+      if (mainTopicInput) {
+        mainTopicInput.value = val;
+      }
+      const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+      if (mainTopicDisplay) {
+        mainTopicDisplay.textContent = val;
+      }
+      if (D.topicInput) {
+        D.topicInput.value = val;
+      }
+      showToast(D, 'Topic selected!', 'success');
+    }
+  });
+}
+        
+    
+/* ---------- NEW: Keyboard Shortcuts ---------- */
+
+// Enter to send
+D.manualInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+    e.preventDefault();
+    D.sendBtn?.click();
+  }
+});
+
+// Esc to stop speaking
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    stopSpeaking();
+    showToast(D, 'Speech stopped', 'info');
+  }
+});
+
+/* ---------- NEW: Argument Validation ---------- */
+export function validateArgument(text) {
+  const words = text.trim().split(/\s+/);
+  
+  // Check minimum words
+  if (words.length < 10) {
+    return {
+      valid: false,
+      message: '⚠️ Your argument is too short. Please provide at least 10 words with clear reasoning.'
+    };
+  }
+  
+  // Check for meaningless patterns
+  const meaninglessPatterns = /^(hi|hello|hey|lets start|let's start|ok|okay|yes|no|start|begin)$/i;
+  if (meaninglessPatterns.test(text.trim())) {
+    return {
+      valid: false,
+      message: '⚠️ Please provide an actual argument about the topic, not just a greeting or command.'
+    };
+  }
+  
+  return { valid: true };
+}
+
+console.log('✅ New features loaded: Random topics, keyboard shortcuts, validation');

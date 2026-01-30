@@ -1,12 +1,10 @@
 import { showToast } from "./toast.js";
 
-// Initialize Speech Recognition (Web Speech API)
 let recognition = null;
 let finalTranscript = "";
 let interimTranscript = "";
 
 function initSpeechRecognition() {
-  // Check for browser support
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   
   if (!SpeechRecognition) {
@@ -53,11 +51,9 @@ export async function startRecording(dom, state) {
     state.mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
 
-    // Reset transcripts
     finalTranscript = "";
     interimTranscript = "";
 
-    // Initialize Web Speech API for real-time transcription
     recognition = initSpeechRecognition();
     
     if (recognition) {
@@ -82,7 +78,6 @@ export async function startRecording(dom, state) {
           }
         }
 
-        // Update display in real-time
         const displayText = finalTranscript + interimTranscript;
         if (displayText.trim()) {
           dom.transcriptDisplay.textContent = displayText;
@@ -103,7 +98,6 @@ export async function startRecording(dom, state) {
         console.log("🛑 Speech recognition ended");
       };
 
-      // Start speech recognition
       try {
         recognition.start();
       } catch (err) {
@@ -121,7 +115,6 @@ export async function startRecording(dom, state) {
       const blob = new Blob(chunks, { type: "audio/webm" });
       stream.getTracks().forEach(track => track.stop());
 
-      // Stop speech recognition if running
       if (recognition) {
         try {
           recognition.stop();
@@ -130,39 +123,29 @@ export async function startRecording(dom, state) {
         }
       }
 
-      // Store the real-time transcript
       const realtimeTranscript = (finalTranscript + interimTranscript).trim();
       console.log("📝 Real-time transcript:", realtimeTranscript);
 
-      // Show loading state
       showToast(dom, "Processing with Whisper for accuracy...", "info");
 
-      // Get Whisper transcription for accuracy
       const whisperTranscript = await transcribeAudio(dom, blob);
 
       if (whisperTranscript) {
         console.log("🎯 Whisper transcript:", whisperTranscript);
-        
-        // Use Whisper transcript as the final version (more accurate)
         state.currentTranscript = whisperTranscript;
         dom.transcriptDisplay.textContent = whisperTranscript;
         dom.transcriptDisplay.classList.remove("empty");
-        
         showToast(dom, "Transcription complete!", "success");
       } else if (realtimeTranscript) {
-        // Fallback to real-time transcript if Whisper fails
         console.log("⚠️ Using real-time transcript as fallback");
         state.currentTranscript = realtimeTranscript;
         dom.transcriptDisplay.textContent = realtimeTranscript;
         dom.transcriptDisplay.classList.remove("empty");
-        
         showToast(dom, "Using real-time transcription", "info");
       } else {
-        // Both failed
         showToast(dom, "No transcription available", "error");
       }
 
-      // Reset for next recording
       finalTranscript = "";
       interimTranscript = "";
     };
@@ -188,7 +171,5 @@ export function stopRecording(dom, state) {
 
     dom.recordBtn.disabled = false;
     dom.stopRecordBtn.disabled = true;
-
-    // Speech recognition will be stopped in mediaRecorder.onstop
   }
 }
