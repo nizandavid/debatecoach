@@ -29,6 +29,9 @@ function closeSettings() {
 D.settingsBtn?.addEventListener("click", openSettings);
 D.openSetupBtn?.addEventListener("click", openSettings);
 D.closeModalBtn?.addEventListener("click", closeSettings);
+D.stopResetBtn?.addEventListener("click", () => {
+  import("./flow.js").then(m => m.stopAndReset(D, state));
+});
 
 // close on overlay click
 D.settingsModal?.addEventListener("click", (e) => {

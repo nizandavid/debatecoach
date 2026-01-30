@@ -5,6 +5,30 @@ import { stopTimer, startTurnTimer } from "./timer.js";
 import { addBubble, clearInput, showInput, hideInput, setTopicHeader, showFeedbackSection, hideFeedbackSection } from "./ui.js";
 import { sendToAI } from "./api.js";
 
+// Argument Validation
+function validateArgument(text) {
+  const words = text.trim().split(/\s+/);
+  
+  // Check minimum words
+  if (words.length < 10) {
+    return {
+      valid: false,
+      message: '⚠️ Your argument is too short. Please provide at least 10 words with clear reasoning.'
+    };
+  }
+  
+  // Check for meaningless patterns (greetings, commands)
+  const meaninglessPatterns = /^(hi|hello|hey|let'?s start|ok|okay|yes|no|start|begin)$/i;
+  if (meaninglessPatterns.test(text.trim())) {
+    return {
+      valid: false,
+      message: '⚠️ Please provide an actual argument about the topic, not just a greeting or command.'
+    };
+  }
+  
+  return { valid: true };
+}
+
 export function isStudentTurn(state, idx) {
   // if student starts => idx even is student; else idx odd is student
   return state.studentStarts ? (idx % 2 === 0) : (idx % 2 === 1);
@@ -30,6 +54,7 @@ export function startSession(dom, state) {
 
   // Pull settings
   state.sessionActive = true;
+  dom.stopResetBtn?.classList.remove("hidden");
   state.topic = topic;
   state.stance = dom.stanceSelect?.value || "PRO";
   state.difficulty = dom.difficultySelect?.value || "Medium";
@@ -159,6 +184,13 @@ export async function studentSend(dom, state) {
     return;
   }
 
+  // ✅ VALIDATE ARGUMENT
+  const validation = validateArgument(text);
+  if (!validation.valid) {
+    showToast(dom, validation.message, "error");
+    return;
+  }
+
   stopTimer(dom, state);
 
   const summaryFlag = isSummaryTurn(state.turnIndex);
@@ -231,4 +263,37 @@ export async function computerTurn(dom, state) {
     addBubble(dom, state, "system", "💻 Computer continues...");
     await computerTurn(dom, state);
   }
+}
+
+export function stopAndReset(dom, state) {
+  // Stop everything immediately
+  stopTimer(dom, state);
+  stopSpeaking();
+  
+  // Stop recording if active
+  if (state.isRecording && state.mediaRecorder) {
+    state.mediaRecorder.stop();
+    state.isRecording = false;
+  }
+  
+  // Reset session state
+  state.sessionActive = false;
+  state.turnIndex = 0;
+  state.messages = [];
+  state.feedbackTurns = [];
+  
+  // Clear UI
+  if (dom.conversationSection) dom.conversationSection.innerHTML = "";
+  clearInput(dom, state);
+  hideInput(dom);
+  hideFeedbackSection(dom);
+  
+  // Show welcome, hide debate sections
+  dom.welcomeSection?.classList.remove("hidden");
+  dom.debateTopicDisplay?.classList.add("hidden");
+  dom.conversationSection?.classList.add("hidden");
+  dom.resetSection?.classList.add("hidden");
+  dom.stopResetBtn?.classList.add("hidden");
+  
+  showToast(dom, "🛑 Session stopped and reset!", "info");
 }

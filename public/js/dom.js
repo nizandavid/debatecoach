@@ -16,6 +16,7 @@ export function dom() {
 
     // settings modal
     settingsBtn: $("settingsBtn"),
+    stopResetBtn: $("stopResetBtn"),
     openSetupBtn: $("openSetupBtn"),
     settingsModal: $("settingsModal"),
     closeModalBtn: $("closeModalBtn"),
