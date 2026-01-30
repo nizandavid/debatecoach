@@ -1,3 +1,4 @@
+// dom.js - DOM references (FIXED WITH selectedTurnMinutes)
 export function dom() {
   const $ = (id) => document.getElementById(id);
 
@@ -30,24 +31,19 @@ export function dom() {
     testVoiceBtn: $("testVoiceBtn"),
     stopSpeakingBtn: $("stopSpeakingBtn"),
 
-    topicsListWrapper: $("topicsListWrapper"),
-    topicsSelect: $("topicsSelect"),
-    hideTopicsBtn: $("hideTopicsBtn"),
-
     // input controls
     recordBtn: $("recordBtn"),
     stopRecordBtn: $("stopRecordBtn"),
     typeBtn: $("typeBtn"),
+    sendBtn: $("sendBtn"),
     transcriptDisplay: $("transcriptDisplay"),
     manualInput: $("manualInput"),
-    sendBtn: $("sendBtn"),
-    endSessionBtn: $("endSessionBtn"),
 
-    // actions
+    // action buttons
     resetBtn: $("resetBtn"),
     endDebateBtn: $("endDebateBtn"),
+    endSessionBtn: $("endSessionBtn"),
     switchSidesBtn: $("switchSidesBtn"),
-    continueDebateBtn: $("continueDebateBtn"),
 
     // feedback
     feedbackContent: $("feedbackContent"),
@@ -55,12 +51,59 @@ export function dom() {
     printFeedbackBtn: $("printFeedbackBtn"),
     newSessionBtn: $("newSessionBtn"),
 
+    // topics
+    topicsListWrapper: $("topicsListWrapper"),
+    topicsSelect: $("topicsSelect"),
+    hideTopicsBtn: $("hideTopicsBtn"),
+
     // toast
     toast: $("toast"),
     toastMessage: $("toastMessage"),
+
+    // ============ NEW ELEMENTS (ADDED!) ============
+    
+    // Welcome screen elements
+    mainTopicDisplay: $("mainTopicDisplay"),
+    editTopicBtn: $("editTopicBtn"),
+    newTopicBtn: $("newTopicBtn"),
+    topicInputWrapper: $("topicInputWrapper"),
+    mainTopicInput: $("mainTopicInput"),
+    saveTopicBtn: $("saveTopicBtn"),
+    cancelTopicBtn: $("cancelTopicBtn"),
+    suggestTopicsMainBtn: $("suggestTopicsMainBtn"),
+    topicsListWrapperMain: $("topicsListWrapperMain"),
+    topicsSelectMain: $("topicsSelectMain"),
+    startDebateBtn: $("startDebateBtn"),
+    
+    // Loading state
+    loadingState: $("loadingState"),
+    
+    // Continue prompt
+    continuePrompt: $("continuePrompt"),
+    continueMoreBtn: $("continueMoreBtn"),
+    getFeedbackBtn: $("getFeedbackBtn"),
+    newTopicBtn2: $("newTopicBtn2"),
+    
+    // Stats section
+    statsSection: $("statsSection"),
+    statArguments: $("statArguments"),
+    statAvgLength: $("statAvgLength"),
+    statDuration: $("statDuration"),
+    statDifficulty: $("statDifficulty"),
+    
+    // Error modal
+    errorOverlay: $("errorOverlay"),
+    errorTitle: $("errorTitle"),
+    errorMessage: $("errorMessage"),
+    errorRetryBtn: $("errorRetryBtn"),
+    errorCancelBtn: $("errorCancelBtn"),
+
+    // Settings
+    closeSettingsBtn: $("closeSettingsBtn")
   };
 }
 
+// ============ HELPER FUNCTION (REQUIRED BY flow.js) ============
 export function selectedTurnMinutes() {
   const el = document.querySelector('input[name="turnMinutes"]:checked');
   const n = Number(el?.value);

@@ -25,15 +25,51 @@
       </div>
     </div>
 
-    <!-- WELCOME MESSAGE (shown when no session) -->
+    <!-- NEW WELCOME SECTION WITH TOPIC -->
     <div id="welcomeSection">
-      <div class="card" style="text-align: center; padding: 60px 32px;">
-        <div style="margin-bottom: 24px;"><img src="debate_logo.png" alt="DebateCoach Logo" style="width: 100px; height: 66px;" /></div>
-        <h2 style="font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 16px;">Welcome to DebateCoach</h2>
-        <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 32px;">
+      <div class="welcome-card">
+        <div class="welcome-logo">
+          <img src="debate_logo.png" alt="DebateCoach Logo" />
+        </div>
+        <h1 class="welcome-title">Welcome to DebateCoach</h1>
+        <p class="welcome-subtitle">
           Practice debate with AI and improve your English speaking skills
         </p>
-        <button class="btn btn-primary" id="openSetupBtn" style="font-size: 18px; padding: 16px 32px;">⚙️ Setup New Debate Session</button>
+
+        <!-- TOPIC SELECTOR (NEW!) -->
+        <div class="topic-selector">
+          <div class="topic-label">🎲 Today's Topic</div>
+          <div class="topic-display" id="mainTopicDisplay">Loading topic...</div>
+          <div class="topic-actions">
+            <button class="btn btn-outline" id="editTopicBtn">✏️ Edit</button>
+            <button class="btn btn-outline" id="newTopicBtn">🎲 New Topic</button>
+          </div>
+        </div>
+
+        <!-- TOPIC INPUT (HIDDEN BY DEFAULT) -->
+        <div class="topic-input-wrapper hidden" id="topicInputWrapper">
+          <input type="text" class="topic-input-field" id="mainTopicInput" placeholder="Enter your debate topic..." />
+          <div class="topic-input-actions">
+            <button class="btn btn-secondary" id="suggestTopicsMainBtn">💡 Suggest Topics</button>
+            <button class="btn btn-success" id="saveTopicBtn">✓ Save</button>
+            <button class="btn btn-secondary" id="cancelTopicBtn">✕ Cancel</button>
+          </div>
+<div id="topicsListWrapperMain" class="hidden">
+  <select class="form-select" id="topicsSelectMain" size="6"></select>
+</div>
+        </div>
+
+        <!-- START BUTTON (ALWAYS VISIBLE) -->
+        <button class="btn btn-primary btn-large" id="startDebateBtn">▶️ Start Debate</button>
+
+       <!-- QUICK TIPS -->
+        <div class="quick-tips">
+          <div class="tip">💡 Use Safari for best voice experience</div>
+          <div class="tip">⚙️ Customize settings before you start</div>
+        </div>
+        
+        <!-- Hidden input for flow.js compatibility -->
+        <input type="text" id="topicInput" style="display: none;" />
       </div>
     </div>
 
@@ -41,6 +77,13 @@
     <div id="debateTopicDisplay" class="debate-topic hidden">
       <div class="debate-topic-label">🎯 Debate Motion</div>
       <div class="debate-topic-text" id="currentTopicText"></div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="loading-state hidden">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">🤔 Thinking...</div>
+      <div class="loading-subtext">Analyzing your argument...</div>
     </div>
 
     <!-- DEBATE CONVERSATION -->
@@ -51,7 +94,6 @@
       <button class="btn btn-warning" id="resetBtn">🔄 Reset Session</button>
       <button class="btn btn-danger" id="endDebateBtn">🏁 End Debate & Get Feedback</button>
       <button class="btn btn-primary hidden" id="switchSidesBtn">🔁 Switch Sides</button>
-      <button class="btn btn-secondary hidden" id="continueDebateBtn">▶️ Continue</button>
     </div>
 
     <!-- INPUT SECTION (shown when it's student's turn) -->
@@ -66,12 +108,14 @@
 
       <div class="transcript-display empty" id="transcriptDisplay">Your transcript will appear here...</div>
 
-      <textarea class="textarea hidden" id="manualInput" placeholder="Type your argument here..."></textarea>
+      <textarea class="textarea hidden" id="manualInput" placeholder="Type your argument here... (Press Enter to send, Ctrl+Enter for new line)"></textarea>
 
       <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-        <button class="btn btn-success" id="sendBtn" style="flex: 1;">📤 I'm Done - Send</button>
+        <button class="btn btn-success" id="sendBtn" style="flex: 1;">📤 Send (Enter)</button>
         <button class="btn btn-danger" id="endSessionBtn">🏁 End Session</button>
       </div>
+
+      <div class="keyboard-hint">💡 Press <kbd>Enter</kbd> to send • <kbd>Ctrl+Enter</kbd> for new line • <kbd>Esc</kbd> to stop speaking</div>
     </div>
 
     <!-- FEEDBACK SECTION (shown after user requests feedback) -->
@@ -85,10 +129,46 @@
 
       <div class="feedback-content" id="feedbackContent">Click a tab to generate feedback...</div>
 
-      <div style="display: flex; gap: 12px; margin-top: 16px;">
+      <!-- STATS SUMMARY (NEW!) -->
+      <div id="statsSection" class="stats-section hidden">
+        <h3 class="stats-title">📊 Session Stats</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">Arguments</div>
+            <div class="stat-value" id="statArguments">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Avg Length</div>
+            <div class="stat-value" id="statAvgLength">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Duration</div>
+            <div class="stat-value" id="statDuration">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Difficulty</div>
+            <div class="stat-value" id="statDifficulty">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
         <button class="btn btn-primary" id="downloadFeedbackBtn">💾 Save Report</button>
         <button class="btn btn-secondary" id="printFeedbackBtn">🖨️ Print</button>
-        <button class="btn btn-success" id="newSessionBtn">🔄 New Session</button>
+        <button class="btn btn-success" id="newSessionBtn">🔄 New Debate</button>
+      </div>
+    </div>
+
+    <!-- CONTINUE DEBATE PROMPT (NEW!) -->
+    <div id="continuePrompt" class="continue-prompt hidden">
+      <div class="continue-card">
+        <h3>✅ Session Complete!</h3>
+        <p>You've completed 6 turns. Would you like to continue debating or get feedback?</p>
+        <div class="continue-actions">
+          <button class="btn btn-success" id="continueMoreBtn">▶️ Continue Debating</button>
+          <button class="btn btn-primary" id="getFeedbackBtn">📊 View Feedback</button>
+          <button class="btn btn-secondary" id="newTopicBtn2">🔄 New Topic</button>
+        </div>
       </div>
     </div>
   </div>
@@ -97,7 +177,7 @@
   <div class="modal-overlay" id="settingsModal">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title">⚙️ Setup Debate Session</div>
+        <div class="modal-title">⚙️ Settings</div>
         <button class="close-modal" id="closeModalBtn">×</button>
       </div>
 
@@ -152,35 +232,7 @@
           </div>
         </div>
 
-        <!-- 2) Topic -->
-        <div class="acc-item">
-          <button type="button" class="acc-header" data-acc="accTopic">
-            <span>💡 Topic</span>
-            <span class="acc-chevron">▾</span>
-          </button>
-
-          <div class="acc-body hidden" id="accTopic">
-            <div class="form-group">
-              <label class="form-label">Debate Topic</label>
-              <input type="text" class="form-input topic-input" id="topicInput"
-                     placeholder="Enter debate topic or click Suggest Topics..." />
-            </div>
-
-            <div style="display:flex; gap:12px; margin-top: 12px; flex-wrap: wrap;">
-              <button class="btn btn-secondary" id="suggestTopicsBtn">💡 Suggest Topics</button>
-            </div>
-
-            <div id="topicsListWrapper" class="hidden" style="margin-top: 12px;">
-              <div class="form-label" style="margin-bottom: 8px;">Choose a suggested topic</div>
-              <select class="form-select" id="topicsSelect"></select>
-              <div style="display:flex; gap:12px; margin-top: 12px; flex-wrap: wrap;">
-                <button class="btn btn-secondary" id="hideTopicsBtn">✖ Hide</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3) Voice -->
+        <!-- 2) Voice -->
         <div class="acc-item">
           <button type="button" class="acc-header" data-acc="accVoice">
             <span>🔊 Voice</span>
@@ -200,7 +252,7 @@
               <div class="form-group">
                 <label class="form-label">Voice</label>
                 <select class="form-select" id="voiceSelect">
-                  <option value="">(default)</option>
+                  <option value="">(System Default)</option>
                 </select>
               </div>
             </div>
@@ -213,10 +265,21 @@
         </div>
       </div>
 
-      <hr style="margin: 24px 0; border: none; border-top: 2px solid var(--border);" />
+      <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" id="closeSettingsBtn" style="flex: 1;">Done</button>
+      </div>
+    </div>
+  </div>
 
-      <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
-        <button class="btn btn-success" id="startSessionBtn" style="flex: 1;">▶️ Start Session</button>
+  <!-- ERROR MODAL (NEW!) -->
+  <div class="error-overlay hidden" id="errorOverlay">
+    <div class="error-modal">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title" id="errorTitle">Error</div>
+      <div class="error-message" id="errorMessage">Something went wrong</div>
+      <div class="error-actions">
+        <button class="btn btn-primary" id="errorRetryBtn">🔄 Retry</button>
+        <button class="btn btn-secondary" id="errorCancelBtn">Cancel</button>
       </div>
     </div>
   </div>

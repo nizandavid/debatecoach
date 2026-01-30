@@ -1,68 +1,152 @@
-import { safe, nowTs } from "./utils.js";
+// ui.js - UI helper functions (FIXED FOR EXISTING STRUCTURE)
+
+// ============ EXISTING FUNCTIONS (KEEP!) ============
 
 export function addBubble(dom, state, who, text, extra = {}) {
-  state.messages.push({
-    who,
-    text: safe(text),
-    transcript: extra.transcript || "",
-    recordingMs: extra.recordingMs || 0,
-    debateNo: state.debateNo,
-    turnIndex: typeof extra.turnIndex === "number" ? extra.turnIndex : null,
-    ts: nowTs(),
-  });
-
-  const message = document.createElement("div");
-  message.className = `message message-${who === "teacher" ? "system" : who}`;
-
-  if (who === "teacher" || who === "system") {
-    message.innerHTML = `<div class="message-body">${safe(text)}</div>`;
-  } else {
-    const icon = who === "computer" ? "💻" : "👤";
-    const name = who === "computer" ? "Computer" : "You";
-    message.innerHTML = `
-      <div class="message-header">
-        <span class="message-icon">${icon}</span>
-        <span>${name}:</span>
-      </div>
-      <div class="message-body">${safe(text)}</div>
-    `;
-  }
-
-  dom.conversationSection?.appendChild(message);
-  if (dom.conversationSection) dom.conversationSection.scrollTop = dom.conversationSection.scrollHeight;
+  const bubble = document.createElement('div');
+  bubble.className = `message message-${who}`;
+  
+  const header = document.createElement('div');
+  header.className = 'message-header';
+  
+  const icon = document.createElement('span');
+  icon.className = 'message-icon';
+  icon.textContent = who === 'computer' ? '🤖' : who === 'student' ? '👤' : 'ℹ️';
+  
+  const label = document.createElement('span');
+  label.textContent = who === 'computer' ? 'Computer' : who === 'student' ? 'You' : 'System';
+  
+  header.appendChild(icon);
+  header.appendChild(label);
+  
+  const body = document.createElement('div');
+  body.className = 'message-body';
+  body.textContent = text;
+  
+  bubble.appendChild(header);
+  bubble.appendChild(body);
+  
+  dom.conversationSection.appendChild(bubble);
+  dom.conversationSection.scrollTop = dom.conversationSection.scrollHeight;
+  
+  return bubble;
 }
 
 export function clearInput(dom, state) {
-  if (dom.transcriptDisplay) {
-    dom.transcriptDisplay.textContent = "Your transcript will appear here...";
-    dom.transcriptDisplay.classList.add("empty");
-  }
   if (dom.manualInput) {
-    dom.manualInput.value = "";
-    dom.manualInput.classList.add("hidden");
+    dom.manualInput.value = '';
   }
-  state.currentTranscript = "";
+  if (dom.transcriptDisplay) {
+    dom.transcriptDisplay.textContent = 'Your transcript will appear here...';
+    dom.transcriptDisplay.classList.add('empty');
+  }
 }
 
 export function showInput(dom) {
-  dom.inputSection?.classList.remove("hidden");
-  if (dom.conversationSection) dom.conversationSection.scrollTop = dom.conversationSection.scrollHeight;
+  if (dom.inputSection) {
+    dom.inputSection.classList.remove('hidden');
+  }
 }
 
 export function hideInput(dom) {
-  dom.inputSection?.classList.add("hidden");
+  if (dom.inputSection) {
+    dom.inputSection.classList.add('hidden');
+  }
 }
 
 export function setTopicHeader(dom, state) {
-  if (!dom.currentTopicText) return;
-  const starter = state.studentStarts ? "You start" : "Computer starts";
-  dom.currentTopicText.textContent = `${state.topic}  (Debate #${state.debateNo} • You: ${state.stance} • ${starter})`;
+  if (dom.currentTopicText && state.topic) {
+    dom.currentTopicText.textContent = state.topic;
+  }
+  if (dom.debateTopicDisplay) {
+    dom.debateTopicDisplay.classList.remove('hidden');
+  }
 }
 
 export function showFeedbackSection(dom) {
-  dom.feedbackSection?.classList.remove("hidden");
+  if (dom.feedbackSection) {
+    dom.feedbackSection.classList.remove('hidden');
+  }
 }
 
 export function hideFeedbackSection(dom) {
-  dom.feedbackSection?.classList.add("hidden");
+  if (dom.feedbackSection) {
+    dom.feedbackSection.classList.add('hidden');
+  }
+}
+
+// ============ NEW FUNCTIONS (ADDED!) ============
+
+// Show error modal
+export function showError(message, title = 'Error') {
+  const errorOverlay = document.getElementById('errorOverlay');
+  const errorTitle = document.getElementById('errorTitle');
+  const errorMessage = document.getElementById('errorMessage');
+  const errorCancelBtn = document.getElementById('errorCancelBtn');
+  const errorRetryBtn = document.getElementById('errorRetryBtn');
+  
+  if (!errorOverlay) {
+    // Fallback to toast if modal not available
+    showToast(message, 'error');
+    return;
+  }
+  
+  errorTitle.textContent = title;
+  errorMessage.textContent = message;
+  errorOverlay.classList.remove('hidden');
+  
+  // Cancel button
+  errorCancelBtn.onclick = () => {
+    errorOverlay.classList.add('hidden');
+  };
+  
+  // Retry button (default: just close)
+  errorRetryBtn.onclick = () => {
+    errorOverlay.classList.add('hidden');
+  };
+}
+
+// Show loading state
+export function showLoading(message = 'Loading...') {
+  const loadingState = document.getElementById('loadingState');
+  if (!loadingState) return;
+  
+  const loadingText = loadingState.querySelector('.loading-text');
+  if (loadingText) {
+    loadingText.textContent = message;
+  }
+  
+  loadingState.classList.remove('hidden');
+}
+
+// Hide loading state
+export function hideLoading() {
+  const loadingState = document.getElementById('loadingState');
+  if (!loadingState) return;
+  loadingState.classList.add('hidden');
+}
+
+// Show success message
+export function showSuccess(message) {
+  showToast(message, 'success');
+}
+
+// Show info message
+export function showInfo(message) {
+  showToast(message, 'info');
+}
+
+// Toast notification
+export function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
+  
+  if (!toast) return;
+  
+  toastMessage.textContent = message;
+  toast.className = 'toast show ' + type;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
 }
