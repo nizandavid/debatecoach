@@ -37,19 +37,20 @@ export async function fetchTopics(dom) {
 export async function sendToAI(dom, state, userText, opts = {}) {
   try {
     const payloadText = opts.isSummary
-      ? `This is your closing summary. Keep it concise and strong.\n\n${userText}`
-      : userText;
+  ? `This is your closing summary. Keep it concise and strong.\n\n${userText}`
+  : userText;
 
-    const res = await fetch("/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topic: state.topic,
-        stance: state.stance,
-        difficulty: state.difficulty,
-        userText: payloadText,
-      }),
-    });
+const res = await fetch("/ask", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    topic: state.topic,
+    stance: state.stance,
+    difficulty: state.difficulty,
+    userText: payloadText,
+    isComputerStarting: opts.isComputerStarting || false,
+  }),
+});
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.details || "Request failed");

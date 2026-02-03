@@ -166,13 +166,31 @@ function actuallySpeak(text, selectedVoiceURI) {
     console.log("Using browser default voice");
   }
 
-  utterance.onstart = function() {
-    console.log("▶️ Speaking started");
-  };
-
   utterance.onend = function() {
-    console.log("✅ Speaking ended");
-  };
+  console.log("✅ Speaking ended");
+  
+  // Show input when TTS finishes
+  import('./ui.js').then(module => {
+    const dom = {
+      inputSection: document.getElementById('inputSection'),
+      recordBtn: document.getElementById('recordBtn'),
+      stopRecordBtn: document.getElementById('stopRecordBtn')
+    };
+    module.showInput(dom);
+    
+    // Reset recording buttons
+    if (dom.recordBtn) dom.recordBtn.disabled = false;
+    if (dom.stopRecordBtn) dom.stopRecordBtn.disabled = true;
+  });
+  
+  import('./toast.js').then(module => {
+    module.showToast(
+      { toastEl: document.getElementById('toast'), toastTextEl: document.getElementById('toastText') },
+      "✨ Your turn! Click Record to respond",
+      "info"
+    );
+  });
+};
 
   utterance.onerror = function(e) {
     console.error("❌ Speech error:", e.error);

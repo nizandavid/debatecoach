@@ -40,10 +40,27 @@
         <!-- TOPIC SELECTOR (NEW!) -->
         <div class="topic-selector">
           <div class="topic-label">🎲 Today's Topic</div>
+          
+          <!-- CATEGORY SELECTOR (NEW!) -->
+          <div class="category-selector">
+            <label for="categorySelect" class="category-label">📚 Category:</label>
+            <select class="form-select category-dropdown" id="categorySelect">
+              <option value="all">All Topics (110+)</option>
+              <option value="society">Society & Politics</option>
+              <option value="technology">Technology & AI</option>
+              <option value="education">Education</option>
+              <option value="environment">Environment & Climate</option>
+              <option value="economics">Economics & Business</option>
+              <option value="health">Health & Science</option>
+              <option value="culture">Culture & Media</option>
+            </select>
+          </div>
+          
           <div class="topic-display" id="mainTopicDisplay">Loading topic...</div>
           <div class="topic-actions">
             <button class="btn btn-outline" id="editTopicBtn">✏️ Edit</button>
             <button class="btn btn-outline" id="newTopicBtn">🎲 New Topic</button>
+            <button class="btn btn-outline btn-ai" id="aiTopicBtn">🤖 AI Topic</button>
           </div>
         </div>
 

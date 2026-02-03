@@ -95,16 +95,19 @@ export function startSession(dom, state) {
   // It is silent-ish but counts as a gesture-initiated speak in many browsers.
   speakText(" ");
 
-  if (isStudentTurn(state, state.turnIndex)) {
-    addBubble(dom, state, "system", "✨ Your turn to start!");
+
+if (isStudentTurn(state, state.turnIndex)) {
+  addBubble(dom, state, "system", "✨ Your turn to respond!");
+  // Don't show input yet - wait for TTS to finish!
+  if (!state.autoSpeak) {
     showInput(dom);
-    startTurnTimer(dom, state, state.turnTimeSec, () => studentSend(dom, state));
-  } else {
-    addBubble(dom, state, "system", "💻 Computer starts!");
-    hideInput(dom);
-    // computer starts immediately
-    computerTurn(dom, state);
   }
+  startTurnTimer(dom, state, state.turnTimeSec, () => studentSend(dom, state));
+} else {
+  addBubble(dom, state, "system", "💻 Computer starts!");
+  hideInput(dom);
+  computerTurn(dom, state);
+}
 }
 
 export function endDebateEarly(dom, state) {
@@ -224,11 +227,17 @@ export async function computerTurn(dom, state) {
   if (isStudentTurn(state, state.turnIndex)) return;
 
   stopTimer(dom, state);
+  hideInput(dom);
 
-  const lastStudent = [...state.messages].reverse().find(m => m.who === "student")?.text || "Hello";
-  addBubble(dom, state, "system", "⏳ Computer is thinking...");
+  const lastStudent = [...state.messages].reverse().find(m => m.who === "student")?.text || "";
+addBubble(dom, state, "system", "⏳ Computer is thinking...");
 
-  const reply = await sendToAI(dom, state, lastStudent, { isSummary: isSummaryTurn(state.turnIndex) });
+// Check if computer is starting first
+const isComputerStarting = state.turnIndex === 0 && !lastStudent;
+const reply = await sendToAI(dom, state, lastStudent, { 
+  isSummary: isSummaryTurn(state.turnIndex),
+  isComputerStarting: isComputerStarting
+});
 
   // remove last "thinking" system bubble if it's last
   const nodes = dom.conversationSection?.querySelectorAll(".message-system") || [];

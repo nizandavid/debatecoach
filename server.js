@@ -82,33 +82,46 @@ async function chat({ system, messages, temperature = 0.7 }) {
 
 // -------------------- prompts --------------------
 function topicsSystemPrompt() {
-  // ✅ ה-PROMPT הסופי שלך
-  return `You are a debate coach for Israeli high-school students (ages 14–18).
-Generate EXACTLY 10 debate motions (one sentence each) that are engaging and relevant to teens.
+  return `You are a debate coach for high-school students (ages 14-18).
+Generate EXACTLY 10 fresh, engaging debate motions.
 
-Hard rules:
-1) Each motion must be from a DIFFERENT category, in this exact order:
-   1. Technology / AI
-   2. Social media / youth culture
-   3. Education / school life
-   4. Israeli society (daily life)
-   5. Civic / democracy / law
-   6. Economy / money / work
-   7. Ethics / moral dilemma
-   8. Environment / climate
-   9. Health / lifestyle / sports
-   10. Global affairs / international relations
-2) Avoid repeating the same topic idea in different wording.
-3) Do NOT start every sentence with “This house believes/This house would”.
-   Vary the phrasing naturally.
-4) Keep each motion clear, concrete, and debatable (not a vague discussion question).
-5) No hate, slurs, graphic content, or illegal instructions.
-6) Use simple-to-medium English (spoken-friendly).
+CRITICAL RULES:
+1) Each motion MUST be from a DIFFERENT category in this EXACT order:
+   1. Technology / AI / Digital World
+   2. Social Media / Youth Culture / Online Life
+   3. Education / School / Learning
+   4. Society / Daily Life / Community
+   5. Politics / Democracy / Rights
+   6. Economics / Money / Work / Business
+   7. Ethics / Morality / Philosophy
+   8. Environment / Climate / Sustainability
+   9. Health / Wellness / Sports / Lifestyle
+   10. Global Affairs / International Relations / World Issues
 
-Output format:
-Return ONLY a JSON array of 10 strings. No extra text, no numbering, no markdown.
-Example: ["...", "...", ...]`;
+2) VARY your phrasing! Do NOT start every motion the same way.
+   Examples of good variety:
+   - "Social media platforms should..."
+   - "Is artificial intelligence..."
+   - "Should governments..."
+   - "The voting age should..."
+   - "Online privacy is more important than..."
+
+3) Make motions CONCRETE and DEBATABLE (not vague discussion questions)
+   GOOD: "Should social media require age verification for all users?"
+   BAD: "What do you think about social media?"
+
+4) Use simple-to-medium English (spoken-friendly, not academic)
+
+5) Make them RELEVANT to teenagers today
+
+6) NO hate, slurs, graphic content, or illegal instructions
+
+7) Each motion should be UNIQUE - avoid similar ideas in different words
+
+Output format: Return ONLY a JSON array of 10 strings. No markdown, no extra text.
+Example: ["Motion 1 here", "Motion 2 here", ...]`;
 }
+
 
 function prepSystemPrompt({ topic, stance, difficulty }) {
   const level =
@@ -287,12 +300,19 @@ app.post("/ask", async (req, res) => {
     const stance = sanitizeStance(req.body?.stance); // student stance
     const difficulty = sanitizeDifficulty(req.body?.difficulty);
     const userText = safeStr(req.body?.userText, "").trim();
-
-    if (!userText) return res.status(400).json({ error: "Missing userText" });
+    const isComputerStarting = req.body?.isComputerStarting || false;
 
     const system = askSystemPrompt({ topic, stance, difficulty });
 
-    const messages = [{ role: "user", content: `My argument:\n${userText}`.slice(0, 6000) }];
+    let messages;
+    if (isComputerStarting) {
+      // Computer starts first - ask it to open the debate
+      messages = [{ role: "user", content: `Please open this debate by presenting your opening argument. Remember, you are arguing the OPPOSITE of ${stance}.`.slice(0, 6000) }];
+    } else {
+      // Normal - respond to student's argument
+      if (!userText) return res.status(400).json({ error: "Missing userText" });
+      messages = [{ role: "user", content: `My argument:\n${userText}`.slice(0, 6000) }];
+    }
 
     const reply = await chat({ system, messages, temperature: 0.7 });
     res.json({ reply });

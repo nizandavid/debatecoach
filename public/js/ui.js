@@ -26,10 +26,20 @@ export function addBubble(dom, state, who, text, extra = {}) {
   bubble.appendChild(header);
   bubble.appendChild(body);
   
-  dom.conversationSection.appendChild(bubble);
-  dom.conversationSection.scrollTop = dom.conversationSection.scrollHeight;
-  
-  return bubble;
+dom.conversationSection.appendChild(bubble);
+dom.conversationSection.scrollTop = dom.conversationSection.scrollHeight;
+
+// Save message to state
+if (who === 'student' || who === 'computer') {
+  state.messages.push({
+    who: who,
+    text: text,
+    timestamp: Date.now(),
+    ...extra
+  });
+}
+
+return bubble;
 }
 
 export function clearInput(dom, state) {

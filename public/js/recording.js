@@ -172,4 +172,14 @@ export function stopRecording(dom, state) {
     dom.recordBtn.disabled = false;
     dom.stopRecordBtn.disabled = true;
   }
+  
+  // Stop speech recognition immediately!
+  if (recognition) {
+    try {
+      recognition.stop();
+      recognition = null;
+    } catch (err) {
+      console.warn("Error stopping recognition:", err);
+    }
+  }
 }

@@ -1,0 +1,173 @@
+/* ==========================================
+   NEW TOPIC SELECTOR STYLES
+   ========================================== */
+
+.category-selector {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.category-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+.category-dropdown {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-dropdown:hover {
+  border-color: #4CAF50;
+}
+
+.category-dropdown:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+/* AI Topic Button Special Styling */
+.btn-ai {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ai:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #63398d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-ai:active {
+  transform: translateY(0);
+}
+
+.btn-ai:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Shimmer effect for AI button */
+.btn-ai::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+/* Topic actions responsiveness */
+.topic-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.topic-actions .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .category-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .category-label {
+    font-size: 13px;
+  }
+  
+  .category-dropdown {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .topic-actions {
+    flex-direction: column;
+  }
+  
+  .topic-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Loading state for AI topic button */
+.btn-ai.loading {
+  pointer-events: none;
+}
+
+.btn-ai.loading::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Topic display enhancement */
+.topic-display {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid #4CAF50;
+}
+
+/* Category badge (optional - for showing current category) */
+.category-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}

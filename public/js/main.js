@@ -197,22 +197,15 @@ console.log("✅ Debug hooks ready: __DC.say('hello')");
 // NEW FEATURES: Random Topics, Welcome Screen, Keyboard Shortcuts
 // ============================================================
 
-/* ---------- NEW: Random Topics ---------- */
-const DEFAULT_TOPICS = [
-  "Social media should be regulated by governments",
-  "Artificial intelligence poses more risks than benefits to society",
-  "Climate change is the most pressing issue of our time",
-  "Online education is as effective as traditional classroom learning",
-  "Privacy is more important than security in the digital age",
-  "Space exploration is a waste of resources",
-  "Animal testing should be banned worldwide",
-  "The voting age should be lowered to 16",
-  "Genetic engineering of humans should be allowed",
-  "Fast food companies should be held responsible for obesity"
-];
+/* ---------- NEW: Enhanced Topics System ---------- */
+import { getRandomTopic, CATEGORIES, getTopicsByCategory } from './topics.js';
 
-function loadRandomTopic() {
-  const randomTopic = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
+// Current selected category
+let currentCategory = 'all';
+
+function loadRandomTopic(category = null) {
+  const cat = category || currentCategory;
+  const randomTopic = getRandomTopic(cat);
   state.topic = randomTopic;
   
   // Update both displays
@@ -224,11 +217,28 @@ function loadRandomTopic() {
     D.topicInput.value = randomTopic;
   }
   
-  console.log('Loaded random topic:', randomTopic);
+  console.log('Loaded random topic from', cat, ':', randomTopic);
 }
 
-// Load random topic on startup
-loadRandomTopic();
+// Populate category selector
+function populateCategorySelector() {
+  const categorySelect = document.getElementById('categorySelect');
+  if (categorySelect) {
+    categorySelect.innerHTML = '';
+    Object.entries(CATEGORIES).forEach(([key, label]) => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = label;
+      categorySelect.appendChild(option);
+    });
+  }
+}
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  populateCategorySelector();
+  loadRandomTopic();
+});
 
 /* ---------- NEW: Welcome Screen Listeners ---------- */
 
@@ -294,6 +304,60 @@ if (newTopicBtn) {
   });
 }
 
+// Category selector
+const categorySelect = document.getElementById('categorySelect');
+if (categorySelect) {
+  categorySelect.addEventListener('change', () => {
+    currentCategory = categorySelect.value;
+    loadRandomTopic();
+    showToast(D, `New topic from ${CATEGORIES[currentCategory]}!`, 'success');
+  });
+}
+
+// AI Generate Topic button
+const aiTopicBtn = document.getElementById('aiTopicBtn');
+if (aiTopicBtn) {
+  aiTopicBtn.addEventListener('click', async () => {
+    console.log('AI topic clicked');
+    unlockTTS();
+    
+    try {
+      aiTopicBtn.disabled = true;
+      aiTopicBtn.textContent = '🤖 Generating...';
+      
+      // Fetch AI-generated topics from API
+      const response = await fetch('/topics');
+      const data = await response.json();
+      
+      if (data.topics && data.topics.length > 0) {
+        // Pick a random one from the AI suggestions
+        const randomAITopic = data.topics[Math.floor(Math.random() * data.topics.length)];
+        state.topic = randomAITopic;
+        
+        // Update displays
+        const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+        if (mainTopicDisplay) {
+          mainTopicDisplay.textContent = randomAITopic;
+        }
+        if (mainTopicInput) {
+          mainTopicInput.value = randomAITopic;
+        }
+        if (D.topicInput) {
+          D.topicInput.value = randomAITopic;
+        }
+        
+        showToast(D, '🤖 AI-generated topic loaded!', 'success');
+      }
+    } catch (err) {
+      console.error('Error generating AI topic:', err);
+      showToast(D, 'Failed to generate AI topic', 'error');
+    } finally {
+      aiTopicBtn.disabled = false;
+      aiTopicBtn.textContent = '🤖 AI Topic';
+    }
+  });
+}
+
 // Save topic button
 const saveTopicBtn = document.getElementById('saveTopicBtn');
 if (saveTopicBtn) {
@@ -318,6 +382,16 @@ if (saveTopicBtn) {
       topicInputWrapper.classList.add('hidden');
     }
     showToast(D, 'Topic updated!', 'success');
+  });
+}
+
+// Cancel topic button
+const cancelTopicBtn = document.getElementById('cancelTopicBtn');
+if (cancelTopicBtn) {
+  cancelTopicBtn.addEventListener('click', () => {
+    if (topicInputWrapper) {
+      topicInputWrapper.classList.add('hidden');
+    }
   });
 }
 
