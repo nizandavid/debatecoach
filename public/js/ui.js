@@ -1,5 +1,7 @@
 // ui.js - UI helper functions (FIXED FOR EXISTING STRUCTURE)
 
+import { clearTranscriptState } from "./recording.js";
+
 // ============ EXISTING FUNCTIONS (KEEP!) ============
 
 export function addBubble(dom, state, who, text, extra = {}) {
@@ -50,6 +52,12 @@ export function clearInput(dom, state) {
     dom.transcriptDisplay.textContent = 'Your transcript will appear here...';
     dom.transcriptDisplay.classList.add('empty');
   }
+  
+  // ✅ CLEAR RECORDING STATE TOO!
+  clearTranscriptState();
+  
+  // ✅ ALSO CLEAR STATE
+  state.currentTranscript = '';
 }
 
 export function showInput(dom) {

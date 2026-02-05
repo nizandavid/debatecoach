@@ -37,11 +37,11 @@
           Practice debate with AI and improve your English speaking skills
         </p>
 
-        <!-- TOPIC SELECTOR (NEW!) -->
+        <!-- TOPIC SELECTOR (SIMPLIFIED!) -->
         <div class="topic-selector">
           <div class="topic-label">🎲 Today's Topic</div>
           
-          <!-- CATEGORY SELECTOR (NEW!) -->
+          <!-- CATEGORY SELECTOR -->
           <div class="category-selector">
             <label for="categorySelect" class="category-label">📚 Category:</label>
             <select class="form-select category-dropdown" id="categorySelect">
@@ -56,25 +56,15 @@
             </select>
           </div>
           
-          <div class="topic-display" id="mainTopicDisplay">Loading topic...</div>
+          <!-- EDITABLE TOPIC DISPLAY (click to edit) -->
+          <div class="topic-display editable" id="mainTopicDisplay" contenteditable="true" spellcheck="false">Loading topic...</div>
+          <div class="topic-hint">💡 Click topic to edit directly</div>
+          
+          <!-- SIMPLIFIED ACTIONS: Only 2 buttons -->
           <div class="topic-actions">
-            <button class="btn btn-outline" id="editTopicBtn">✏️ Edit</button>
-            <button class="btn btn-outline" id="newTopicBtn">🎲 New Topic</button>
+            <button class="btn btn-outline" id="newTopicBtn">🎲 Random Topic</button>
             <button class="btn btn-outline btn-ai" id="aiTopicBtn">🤖 AI Topic</button>
           </div>
-        </div>
-
-        <!-- TOPIC INPUT (HIDDEN BY DEFAULT) -->
-        <div class="topic-input-wrapper hidden" id="topicInputWrapper">
-          <input type="text" class="topic-input-field" id="mainTopicInput" placeholder="Enter your debate topic..." />
-          <div class="topic-input-actions">
-            <button class="btn btn-secondary" id="suggestTopicsMainBtn">💡 Suggest Topics</button>
-            <button class="btn btn-success" id="saveTopicBtn">✓ Save</button>
-            <button class="btn btn-secondary" id="cancelTopicBtn">✕ Cancel</button>
-          </div>
-<div id="topicsListWrapperMain" class="hidden">
-  <select class="form-select" id="topicsSelectMain" size="6"></select>
-</div>
         </div>
 
         <!-- START BUTTON (ALWAYS VISIBLE) -->

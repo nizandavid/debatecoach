@@ -51,6 +51,7 @@ export async function startRecording(dom, state) {
     state.mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
 
+    // ✅ CLEAR TRANSCRIPTS BEFORE STARTING
     finalTranscript = "";
     interimTranscript = "";
 
@@ -146,6 +147,7 @@ export async function startRecording(dom, state) {
         showToast(dom, "No transcription available", "error");
       }
 
+      // ✅ CLEAR TRANSCRIPTS AFTER PROCESSING
       finalTranscript = "";
       interimTranscript = "";
     };
@@ -173,7 +175,7 @@ export function stopRecording(dom, state) {
     dom.stopRecordBtn.disabled = true;
   }
   
-  // Stop speech recognition immediately!
+  // ✅ STOP SPEECH RECOGNITION IMMEDIATELY!
   if (recognition) {
     try {
       recognition.stop();
@@ -182,4 +184,22 @@ export function stopRecording(dom, state) {
       console.warn("Error stopping recognition:", err);
     }
   }
+}
+
+// ✅ NEW: Clear transcript state (called after sending message)
+export function clearTranscriptState() {
+  finalTranscript = "";
+  interimTranscript = "";
+  
+  // Also stop any ongoing recognition
+  if (recognition) {
+    try {
+      recognition.stop();
+      recognition = null;
+    } catch (err) {
+      console.warn("Error stopping recognition in clearTranscriptState:", err);
+    }
+  }
+  
+  console.log("✅ Transcript state cleared");
 }

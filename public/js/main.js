@@ -249,6 +249,12 @@ if (startDebateBtn) {
     console.log('Start debate clicked');
     unlockTTS();
     
+    // Get topic from the editable div
+    const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+    if (mainTopicDisplay) {
+      state.topic = mainTopicDisplay.textContent.trim();
+    }
+    
     if (!state.topic || state.topic.trim().length < 5) {
       import('./ui.js').then(({ showError }) => {
         showError('Please enter a valid debate topic (at least 5 characters)');
@@ -264,33 +270,12 @@ if (startDebateBtn) {
       D.topicInput.value = state.topic;
     }
     
-    // Call startSession
-console.log('About to call startSession with topic:', state.topic);
-console.log('D.topicInput:', D.topicInput);
-startSession(D, state);
-console.log('startSession called!');
+    console.log('About to call startSession with topic:', state.topic);
+    startSession(D, state);
     
     // Make sure the topic is displayed
     D.debateTopicDisplay?.classList.remove('hidden');
     D.currentTopicText.textContent = state.topic;
-  });
-}
-
-// Edit topic button
-const editTopicBtn = document.getElementById('editTopicBtn');
-const topicInputWrapper = document.getElementById('topicInputWrapper');
-const mainTopicInput = document.getElementById('mainTopicInput');
-
-if (editTopicBtn) {
-  editTopicBtn.addEventListener('click', () => {
-    console.log('Edit topic clicked');
-    if (topicInputWrapper) {
-      topicInputWrapper.classList.remove('hidden');
-    }
-    if (mainTopicInput) {
-      mainTopicInput.value = state.topic;
-      mainTopicInput.focus();
-    }
   });
 }
 
@@ -334,13 +319,10 @@ if (aiTopicBtn) {
         const randomAITopic = data.topics[Math.floor(Math.random() * data.topics.length)];
         state.topic = randomAITopic;
         
-        // Update displays
+        // Update the editable display
         const mainTopicDisplay = document.getElementById('mainTopicDisplay');
         if (mainTopicDisplay) {
           mainTopicDisplay.textContent = randomAITopic;
-        }
-        if (mainTopicInput) {
-          mainTopicInput.value = randomAITopic;
         }
         if (D.topicInput) {
           D.topicInput.value = randomAITopic;
@@ -358,102 +340,38 @@ if (aiTopicBtn) {
   });
 }
 
-// Save topic button
-const saveTopicBtn = document.getElementById('saveTopicBtn');
-if (saveTopicBtn) {
-  saveTopicBtn.addEventListener('click', () => {
-    const newTopic = mainTopicInput.value.trim();
-    if (newTopic.length < 5) {
+/* ---------- Inline Topic Editing ---------- */
+const mainTopicDisplay = document.getElementById('mainTopicDisplay');
+if (mainTopicDisplay) {
+  // Update state when user edits the topic inline
+  mainTopicDisplay.addEventListener('input', () => {
+    state.topic = mainTopicDisplay.textContent.trim();
+    if (D.topicInput) {
+      D.topicInput.value = state.topic;
+    }
+  });
+  
+  // Prevent Enter key from creating new lines
+  mainTopicDisplay.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      mainTopicDisplay.blur(); // Unfocus after pressing Enter
+    }
+  });
+  
+  // Visual feedback on focus
+  mainTopicDisplay.addEventListener('focus', () => {
+    mainTopicDisplay.style.outline = '2px solid #4CAF50';
+  });
+  
+  mainTopicDisplay.addEventListener('blur', () => {
+    mainTopicDisplay.style.outline = 'none';
+    // Validate minimum length
+    if (state.topic.length < 5) {
       import('./ui.js').then(({ showError }) => {
         showError('Topic must be at least 5 characters long');
       });
-      return;
-    }
-    state.topic = newTopic;
-    
-    const mainTopicDisplay = document.getElementById('mainTopicDisplay');
-    if (mainTopicDisplay) {
-      mainTopicDisplay.textContent = newTopic;
-    }
-    if (D.topicInput) {
-      D.topicInput.value = newTopic;
-    }
-    if (topicInputWrapper) {
-      topicInputWrapper.classList.add('hidden');
-    }
-    showToast(D, 'Topic updated!', 'success');
-  });
-}
-
-// Cancel topic button
-const cancelTopicBtn = document.getElementById('cancelTopicBtn');
-if (cancelTopicBtn) {
-  cancelTopicBtn.addEventListener('click', () => {
-    if (topicInputWrapper) {
-      topicInputWrapper.classList.add('hidden');
-    }
-  });
-}
-
-// Suggest topics button (main screen)
-const suggestTopicsMainBtn = document.getElementById('suggestTopicsMainBtn');
-if (suggestTopicsMainBtn) {
-  suggestTopicsMainBtn.addEventListener('click', async () => {
-    console.log('Suggest topics clicked (main)');
-    unlockTTS();
-    
-    try {
-      // Fetch topics from API
-      const response = await fetch('/topics');
-      const data = await response.json();
-      
-      if (data.topics && data.topics.length > 0) {
-        // Fill the main screen dropdown
-        const topicsSelectMain = document.getElementById('topicsSelectMain');
-        if (topicsSelectMain) {
-          topicsSelectMain.innerHTML = '';
-          data.topics.forEach(topic => {
-            const option = document.createElement('option');
-            option.value = topic;
-            option.textContent = topic;
-            topicsSelectMain.appendChild(option);
-          });
-        }
-        
-        // Show the dropdown
-        const topicsListWrapperMain = document.getElementById('topicsListWrapperMain');
-        if (topicsListWrapperMain) {
-          topicsListWrapperMain.classList.remove('hidden');
-        }
-        
-        showToast(D, 'Topics loaded!', 'success');
-      }
-    } catch (err) {
-      console.error('Error fetching topics:', err);
-      showToast(D, 'Failed to load topics', 'error');
-    }
-  });
-}
-
-// Topics select (main screen) - when user picks a topic
-const topicsSelectMain = document.getElementById('topicsSelectMain');
-if (topicsSelectMain) {
-  topicsSelectMain.addEventListener('change', () => {
-    const val = topicsSelectMain.value;
-    if (val) {
-      // Update topic
-      state.topic = val;
-      if (mainTopicInput) {
-        mainTopicInput.value = val;
-      }
-      const mainTopicDisplay = document.getElementById('mainTopicDisplay');
-      if (mainTopicDisplay) {
-        mainTopicDisplay.textContent = val;
-      }
-      if (D.topicInput) {
-        D.topicInput.value = val;
-      }
-      showToast(D, 'Topic selected!', 'success');
+      loadRandomTopic(); // Reset to a valid random topic
     }
   });
 }
