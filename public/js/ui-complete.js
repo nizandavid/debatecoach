@@ -16,22 +16,10 @@ export function addBubble(dom, state, who, text, extra = {}) {
   const avatar = document.createElement('div');
   avatar.className = `message-avatar message-avatar-${who}`;
   
-  // Create icon element
-  const icon = document.createElement('img');
+  const icon = document.createElement('span');
   icon.className = 'avatar-icon';
-  
-  // Use SVG files for avatars
-  if (who === 'computer') {
-    icon.src = '/computer-avatar.svg';
-    icon.alt = 'Computer';
-  } else if (who === 'student') {
-    icon.src = '/student-avatar.svg';
-    icon.alt = 'Student';
-  } else {
-    // System - no icon
-    icon.style.display = 'none';
-  }
-  
+  // Simple icons: white silhouette for student, monitor for computer
+  icon.textContent = who === 'computer' ? '🖥️' : who === 'student' ? '👤' : '';
   avatar.appendChild(icon);
   
   // Header (name + role tag, outside the content box)

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DebateCoach - Practice Debate with AI</title>
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/new-features.css" />
 </head>
 <body>
   <div class="container">
@@ -20,6 +21,7 @@
       <div class="timer-section">
         <button class="btn btn-secondary" id="settingsBtn">⚙️ Settings</button>
         <button class="btn btn-danger hidden" id="stopResetBtn">🛑 Stop & Reset</button>
+        <button class="btn btn-success hidden" id="downloadTranscriptBtn">📥 Download</button>
         <div id="timerSection" class="hidden">
           <div class="timer-display" id="timerDisplay">5:00</div>
         </div>
@@ -37,11 +39,11 @@
           Practice debate with AI and improve your English speaking skills
         </p>
 
-        <!-- TOPIC SELECTOR (SIMPLIFIED!) -->
+        <!-- TOPIC SELECTOR (NEW!) -->
         <div class="topic-selector">
           <div class="topic-label">🎲 Today's Topic</div>
           
-          <!-- CATEGORY SELECTOR -->
+          <!-- CATEGORY SELECTOR (NEW!) -->
           <div class="category-selector">
             <label for="categorySelect" class="category-label">📚 Category:</label>
             <select class="form-select category-dropdown" id="categorySelect">
@@ -56,14 +58,24 @@
             </select>
           </div>
           
-          <!-- EDITABLE TOPIC DISPLAY (click to edit) -->
-          <div class="topic-display editable" id="mainTopicDisplay" contenteditable="true" spellcheck="false">Loading topic...</div>
-          <div class="topic-hint">💡 Click topic to edit directly</div>
-          
-          <!-- SIMPLIFIED ACTIONS: Only 2 buttons -->
+          <div class="topic-display" id="mainTopicDisplay">Loading topic...</div>
           <div class="topic-actions">
-            <button class="btn btn-outline" id="newTopicBtn">🎲 Random Topic</button>
+            <button class="btn btn-outline" id="editTopicBtn">✏️ Edit</button>
+            <button class="btn btn-outline" id="newTopicBtn">🎲 New Topic</button>
             <button class="btn btn-outline btn-ai" id="aiTopicBtn">🤖 AI Topic</button>
+          </div>
+        </div>
+
+        <!-- TOPIC INPUT (HIDDEN BY DEFAULT) -->
+        <div class="topic-input-wrapper hidden" id="topicInputWrapper">
+          <input type="text" class="topic-input-field" id="mainTopicInput" placeholder="Enter your debate topic..." />
+          <div class="topic-input-actions">
+            <button class="btn btn-secondary" id="suggestTopicsMainBtn">💡 Suggest Topics</button>
+            <button class="btn btn-success" id="saveTopicBtn">✓ Save</button>
+            <button class="btn btn-secondary" id="cancelTopicBtn">✕ Cancel</button>
+          </div>
+          <div id="topicsListWrapperMain" class="hidden">
+            <select class="form-select" id="topicsSelectMain" size="6"></select>
           </div>
         </div>
 
@@ -108,11 +120,12 @@
     <div id="inputSection" class="input-section hidden">
       <div class="card-title">✍️ Your Turn</div>
 
-      <div class="input-controls">
-        <button class="btn btn-danger" id="recordBtn">🎤 Record</button>
-        <button class="btn btn-secondary" id="stopRecordBtn" disabled>⏹️ Stop</button>
-        <button class="btn btn-info" id="typeBtn">⌨️ Type Instead</button>
-      </div>
+     <div class="input-controls">
+  <button class="btn btn-danger" id="recordBtn">🎤 Record</button>
+  <button class="btn btn-secondary" id="stopRecordBtn" disabled>⏹️ Stop</button>
+  <button class="btn btn-info" id="typeBtn">⌨️ Type Instead</button>
+  <button class="btn btn-primary" id="helpBtn">💡 Help</button>
+</div>
 
       <div class="transcript-display empty" id="transcriptDisplay">Your transcript will appear here...</div>
 
@@ -289,6 +302,42 @@
         <button class="btn btn-primary" id="errorRetryBtn">🔄 Retry</button>
         <button class="btn btn-secondary" id="errorCancelBtn">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- HELP MODAL (FIXED!) -->
+  <div class="modal-overlay hidden" id="helpModal">
+  <div class="modal" style="background:rgba(30,30,40,0.97); border-radius:16px; width:90%; max-width:600px; padding:0; overflow:hidden;">
+    
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.15);">
+      <span style="color:#ffffff; font-size:20px; font-weight:700;">💡 Need Help?</span>
+      <button id="helpClose" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:20px; width:36px; height:36px; border-radius:50%; cursor:pointer;">×</button>
+    </div>
+
+    <!-- BODY -->
+    <div style="padding:24px;">
+      <p style="color:rgba(255,255,255,0.7); font-size:15px; margin-bottom:16px;">Stuck? Get AI-generated talking points to help you continue the debate!</p>
+      <button class="btn btn-primary" id="getHelpBtn" style="width:100%; margin-bottom:16px;">✨ Generate Talking Points</button>
+      <div id="helpContent" style="color:#ffffff; font-size:16px; line-height:1.8; white-space:pre-wrap;"></div>
+    </div>
+
+  </div>
+</div>
+
+  <!-- PROGRESS TRACKER -->
+  <div id="progressTracker" class="progress-tracker hidden">
+    <div class="progress-item">
+      <div class="progress-label">Debates Completed</div>
+      <div class="progress-value" id="debatesCount">0</div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label">Total Arguments</div>
+      <div class="progress-value" id="argumentsCount">0</div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label">Avg. Response Time</div>
+      <div class="progress-value" id="avgTime">--</div>
     </div>
   </div>
 

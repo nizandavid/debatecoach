@@ -420,3 +420,56 @@ export function validateArgument(text) {
 }
 
 console.log('✅ New features loaded: Random topics, keyboard shortcuts, validation');
+
+// Add this to main.js or run in browser console to debug
+
+console.log('=== HELP BUTTON DEBUG ===');
+
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const helpClose = document.getElementById('helpClose');
+const getHelpBtn = document.getElementById('getHelpBtn');
+
+if (helpBtn) {
+  helpBtn.addEventListener('click', () => {
+    helpModal.classList.add('active');
+    helpModal.classList.remove('hidden');
+  });
+}
+
+if (helpClose) {
+  helpClose.addEventListener('click', () => {
+    helpModal.classList.remove('active');
+    helpModal.classList.add('hidden');
+  });
+}
+
+// Close on background click
+if (helpModal) {
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) {
+      helpModal.classList.remove('active');
+      helpModal.classList.add('hidden');
+    }
+  });
+if (getHelpBtn) {
+  getHelpBtn.addEventListener('click', async () => {
+    const helpContent = document.getElementById('helpContent');
+    helpContent.innerHTML = '<p>⏳ Generating talking points...</p>';
+    
+    try {
+      const res = await fetch('/help', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: state.topic,
+          stance: state.stance,
+        }),
+      });
+      const data = await res.json();
+      helpContent.innerHTML = data.reply || 'No suggestions available';
+    } catch (err) {
+      helpContent.innerHTML = '❌ Error generating help. Please try again.';
+    }
+  });
+}}

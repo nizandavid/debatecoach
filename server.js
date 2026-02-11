@@ -324,7 +324,32 @@ app.post("/ask", async (req, res) => {
     });
   }
 });
+app.post("/help", async (req, res) => {
+  try {
+    const topic = safeStr(req.body?.topic, "Debate topic");
+    const stance = sanitizeStance(req.body?.stance);
 
+    const system = [
+      "You are a debate coach helping a student.",
+      "Give 3 short talking points the student can use.",
+      "Be encouraging and clear.",
+      "No markdown, no asterisks.",
+      `Topic: "${topic}"`,
+      `Student argues: ${stance}`,
+    ].join("\n");
+
+    const messages = [{
+      role: "user",
+      content: "Give me 3 talking points to help me continue the debate."
+    }];
+
+    const reply = await chat({ system, messages, temperature: 0.7 });
+    res.json({ reply });
+  } catch (err) {
+    console.error("❌ /help:", err);
+    res.status(500).json({ error: "Help failed" });
+  }
+});
 // 🔹 Feedback on FULL debate
 app.post("/feedback", async (req, res) => {
   try {

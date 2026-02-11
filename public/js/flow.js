@@ -4,6 +4,10 @@ import { stopSpeaking, speakText, unlockTTS } from "./tts.js";
 import { stopTimer, startTurnTimer } from "./timer.js";
 import { addBubble, clearInput, showInput, hideInput, setTopicHeader, showFeedbackSection, hideFeedbackSection } from "./ui.js";
 import { sendToAI } from "./api.js";
+import { setupDownloadButton, showDownloadButton, hideDownloadButton } from './download-transcript.js';
+import { setupHelpButton } from './help-feature.js';
+import { initProgressTracker, showProgressTracker, hideProgressTracker, recordDebateComplete, recordResponseTime, loadProgress } from './progress-tracker.js';
+import { updateTimerDisplay, resetTimerWarnings, setupTimerControls, showTimerPauseButton, hideTimerPauseButton } from './timer-enhancements.js';
 
 // Argument Validation
 function validateArgument(text) {
@@ -55,6 +59,13 @@ export function startSession(dom, state) {
   // Pull settings
   state.sessionActive = true;
   dom.stopResetBtn?.classList.remove("hidden");
+  
+  // ✨ Show new feature buttons
+  showDownloadButton();
+  showProgressTracker();
+  showTimerPauseButton();
+  // Note: Help button is part of Input Section, shows automatically
+  
   state.topic = topic;
   state.stance = dom.stanceSelect?.value || "PRO";
   state.difficulty = dom.difficultySelect?.value || "Medium";
@@ -89,7 +100,7 @@ export function startSession(dom, state) {
 
   setTopicHeader(dom, state);
 
-  addBubble(dom, state, "system", `📢 ${turnLabel(state, state.turnIndex)}`);
+  addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
 
   // Unlock TTS with a tiny utterance on a user gesture path (Start Session click)
   // It is silent-ish but counts as a gesture-initiated speak in many browsers.
@@ -97,14 +108,14 @@ export function startSession(dom, state) {
 
 
 if (isStudentTurn(state, state.turnIndex)) {
-  addBubble(dom, state, "system", "✨ Your turn to respond!");
+  addBubble(dom, state, "system", "Your turn to respond");
   // Don't show input yet - wait for TTS to finish!
   if (!state.autoSpeak) {
     showInput(dom);
   }
   startTurnTimer(dom, state, state.turnTimeSec, () => studentSend(dom, state));
 } else {
-  addBubble(dom, state, "system", "💻 Computer starts!");
+  addBubble(dom, state, "system", "Computer starts");
   hideInput(dom);
   computerTurn(dom, state);
 }
@@ -129,6 +140,10 @@ export function debateCompleteUI(dom, state) {
   stopSpeaking();
   addBubble(dom, state, "system", `🎉 Debate #${state.debateNo} complete (6 turns).`);
 
+  // ✨ Record progress when debate completes
+  const progress = loadProgress();
+  recordDebateComplete(progress, state);
+
   dom.resetSection?.classList.remove("hidden");
   dom.switchSidesBtn?.classList.remove("hidden");
   showToast(dom, "Debate complete. You can now request teacher feedback.", "success");
@@ -151,16 +166,16 @@ export function switchSides(dom, state) {
   dom.continueDebateBtn?.classList.add("hidden");
 
   addBubble(dom, state, "system", "— 🔁 Switching sides —");
-  addBubble(dom, state, "system", `📢 ${turnLabel(state, state.turnIndex)}`);
+  addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
 
   clearInput(dom, state);
 
   if (isStudentTurn(state, state.turnIndex)) {
-    addBubble(dom, state, "system", "✨ Your turn to start!");
+    addBubble(dom, state, "system", "Your turn to start");
     showInput(dom);
     startTurnTimer(dom, state, state.turnTimeSec, () => studentSend(dom, state));
   } else {
-    addBubble(dom, state, "system", "💻 Computer starts!");
+    addBubble(dom, state, "system", "Computer starts");
     hideInput(dom);
     computerTurn(dom, state);
   }
@@ -218,7 +233,7 @@ export async function studentSend(dom, state) {
     return;
   }
 
-  addBubble(dom, state, "system", `📢 ${turnLabel(state, state.turnIndex)}`);
+  addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
   await computerTurn(dom, state);
 }
 
@@ -262,14 +277,14 @@ const reply = await sendToAI(dom, state, lastStudent, {
     return;
   }
 
-  addBubble(dom, state, "system", `📢 ${turnLabel(state, state.turnIndex)}`);
+  addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
   if (isStudentTurn(state, state.turnIndex)) {
-    addBubble(dom, state, "system", "✨ Your turn to respond!");
+    addBubble(dom, state, "system", "Your turn to respond");
     showInput(dom);
     startTurnTimer(dom, state, state.turnTimeSec, () => studentSend(dom, state));
   } else {
     // shouldn't happen, but keep safe
-    addBubble(dom, state, "system", "💻 Computer continues...");
+    addBubble(dom, state, "system", "Computer continues");
     await computerTurn(dom, state);
   }
 }
@@ -304,5 +319,20 @@ export function stopAndReset(dom, state) {
   dom.resetSection?.classList.add("hidden");
   dom.stopResetBtn?.classList.add("hidden");
   
+  // ✨ Hide new feature buttons and reset warnings
+  hideDownloadButton();
+  hideProgressTracker();
+  hideTimerPauseButton();
+  resetTimerWarnings();
+  // Note: Help button is part of Input Section, hides automatically
+  
   showToast(dom, "🛑 Session stopped and reset!", "info");
+}
+
+// ✨ Initialize all new features (call this from main.js or at app startup)
+export function initializeFeatures(dom, state) {
+  setupDownloadButton(dom, state);
+  setupHelpButton(dom, state);
+  initProgressTracker();
+  setupTimerControls(state);
 }
