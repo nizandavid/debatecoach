@@ -1,0 +1,8 @@
+<!-- student-icon.svg - White silhouette on transparent background -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48">
+  <!-- Head circle -->
+  <circle cx="12" cy="7" r="4" fill="white"/>
+  
+  <!-- Shoulders/body -->
+  <path d="M12 13c-4 0-7 2-7 5v3h14v-3c0-3-3-5-7-5z" fill="white"/>
+</svg>

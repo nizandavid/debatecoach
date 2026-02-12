@@ -1,0 +1,44 @@
+/* ============================================
+   NEW STYLES FOR SIMPLIFIED TOPIC SELECTOR
+   ============================================ */
+
+/* Make topic display look editable */
+.topic-display.editable {
+  cursor: text;
+  padding: 16px 20px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  transition: all 0.3s ease;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.topic-display.editable:hover {
+  border-color: #4CAF50;
+  background: #f0f8f0;
+}
+
+.topic-display.editable:focus {
+  outline: 2px solid #4CAF50;
+  border-color: #4CAF50;
+  background: white;
+}
+
+/* Topic hint styling */
+.topic-hint {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+/* Hide the old topic input wrapper (in case it still exists) */
+.topic-input-wrapper {
+  display: none !important;
+}

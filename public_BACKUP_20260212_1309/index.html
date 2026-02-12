@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="timer-section">
-<button class="btn btn-secondary btn-sm hidden" id="settingsBtn">⚙️</button>
+        <button class="btn btn-secondary btn-sm" id="settingsBtn">⚙️</button>
         <button class="btn btn-danger hidden" id="stopResetBtn">🛑 Stop & Reset</button>
         <button class="btn btn-success hidden" id="downloadTranscriptBtn">📥 Download</button>
         <div id="timerSection" class="hidden">
@@ -155,46 +155,29 @@
       <button class="btn btn-primary hidden" id="switchSidesBtn">🔁 Switch Sides</button>
     </div>
 
+    <!-- INPUT SECTION (shown when it's student's turn) -->
+    <div id="inputSection" class="input-section hidden">
+      <div class="card-title">✍️ Your Turn</div>
 
-  
- <!-- INPUT SECTION (shown when it's student's turn) -->
-<div id="inputSection" class="input-section hidden">
-  <div class="card-title">✍️ Your Turn</div>
-  
-  <!-- TALKING POINTS SECTION -->
-  <div class="talking-points-section">
-    <button class="btn btn-info" id="generateTalkingPointsBtn">
-      ✨ Generate Talking Points
-    </button>
-    
-    <div id="talkingPointsContainer" class="talking-points-container hidden">
-      <div class="talking-points-header">
-        <h4>💡 Talking Points for Your Side</h4>
-        <button class="close-points-btn" id="closeTalkingPointsBtn">✕</button>
-      </div>
-      <div id="talkingPointsContent" class="talking-points-content">
-        <!-- AI points appear here -->
-      </div>
-    </div>
-  </div>
-  
-  <!-- INPUT CONTROLS -->
-  <div class="input-controls">
-    <button class="btn btn-danger" id="recordBtn">🎤 Record</button>
-    <button class="btn btn-secondary" id="stopRecordBtn" disabled>⏹️ Stop</button>
-    <button class="btn btn-info" id="typeBtn">⌨️ Type Instead</button>
-  </div>
-  
-  <div class="transcript-display empty" id="transcriptDisplay">Your transcript will appear here...</div>
-  <textarea class="textarea hidden" id="manualInput" placeholder="Type your argument here... (Press Enter to send, Ctrl+Enter for new line)"></textarea>
-  
-  <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-    <button class="btn btn-success" id="sendBtn" style="flex: 1;">📤 Send (Enter)</button>
-    <button class="btn btn-danger" id="endSessionBtn">🏁 End Session</button>
-  </div>
-  
-  <div class="keyboard-hint">💡 Press <kbd>Enter</kbd> to send • <kbd>Ctrl+Enter</kbd> for new line • <kbd>Esc</kbd> to stop speaking</div>
+     <div class="input-controls">
+  <button class="btn btn-danger" id="recordBtn">🎤 Record</button>
+  <button class="btn btn-secondary" id="stopRecordBtn" disabled>⏹️ Stop</button>
+  <button class="btn btn-info" id="typeBtn">⌨️ Type Instead</button>
+  <button class="btn btn-primary" id="helpBtn">💡 Help</button>
 </div>
+
+      <div class="transcript-display empty" id="transcriptDisplay">Your transcript will appear here...</div>
+
+      <textarea class="textarea hidden" id="manualInput" placeholder="Type your argument here... (Press Enter to send, Ctrl+Enter for new line)"></textarea>
+
+      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+        <button class="btn btn-success" id="sendBtn" style="flex: 1;">📤 Send (Enter)</button>
+        <button class="btn btn-danger" id="endSessionBtn">🏁 End Session</button>
+      </div>
+
+      <div class="keyboard-hint">💡 Press <kbd>Enter</kbd> to send • <kbd>Ctrl+Enter</kbd> for new line • <kbd>Esc</kbd> to stop speaking</div>
+    </div>
+
     <!-- FEEDBACK SECTION (shown after user requests feedback) -->
     <div id="feedbackSection" class="card hidden" style="margin-top: 16px;">
       <div class="card-title">🎓 Teacher's Feedback</div>
@@ -478,7 +461,21 @@
   </div>
 </div>
 
-
+  <!-- PROGRESS TRACKER -->
+  <div id="progressTracker" class="progress-tracker hidden">
+    <div class="progress-item">
+      <div class="progress-label">Debates Completed</div>
+      <div class="progress-value" id="debatesCount">0</div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label">Total Arguments</div>
+      <div class="progress-value" id="argumentsCount">0</div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label">Avg. Response Time</div>
+      <div class="progress-value" id="avgTime">--</div>
+    </div>
+  </div>
 
   <!-- TOAST -->
   <div class="toast" id="toast">
