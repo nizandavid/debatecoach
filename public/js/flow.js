@@ -272,10 +272,30 @@ const reply = await sendToAI(dom, state, lastStudent, {
 
   state.turnIndex += 1;
 
+  // ✅ CHECK FINAL ROUND COMPLETION
+  if (window.isFinalRound && window.finalRoundTurnsRemaining !== undefined) {
+    window.finalRoundTurnsRemaining--;
+    console.log('🏁 Final Round turns remaining:', window.finalRoundTurnsRemaining);
+    if (window.finalRoundTurnsRemaining <= 0) {
+      console.log('🏁 Final Round complete! Ending debate...');
+      addBubble(dom, state, "system", "🏁 Final Round complete!");
+      
+      setTimeout(() => {
+        const endBtn = document.getElementById('endDebateBtn');
+        if (endBtn) {
+          endBtn.click();
+        }
+      }, 2000);
+      return;
+    }
+  }
+
   if (state.turnIndex >= state.totalTurns) {
     debateCompleteUI(dom, state);
     return;
   }
+
+  addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
 
   addBubble(dom, state, "system", `${turnLabel(state, state.turnIndex)}`);
   if (isStudentTurn(state, state.turnIndex)) {

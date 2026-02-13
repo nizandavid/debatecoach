@@ -2919,3 +2919,24 @@ div#helpModal.active {
     font-size: 14px;
   }
 }
+/* ==========================================
+   FINAL ROUND BUTTON
+   ========================================== */
+#finalRoundBtn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+#finalRoundBtn:hover {
+  background: linear-gradient(135deg, #e082ea 0%, #e4465b 100%);
+  box-shadow: 0 12px 28px rgba(245, 87, 108, 0.4);
+}
+
+.final-round-mode {
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.15), rgba(245, 87, 108, 0.15));
+  border: 2px solid rgba(245, 87, 108, 0.3);
+  border-radius: 20px;

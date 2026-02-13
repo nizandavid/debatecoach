@@ -10,13 +10,15 @@ import { downloadSession, printSession } from "./export.js";
 
 const D = dom();
 
+// ✅ GLOBAL MODE TRACKING
+window.currentDebateMode = 'training';
+
 /* ---------- init ---------- */
 initAccordion();
 initTTS(D, state);
 
 /* ---------- Settings modal open/close ---------- */
 function openSettings() {
-  // ✅ unlock on user gesture (opening modal counts as a click)
   unlockTTS();
   D.settingsModal?.classList.add("active");
   D.topicsListWrapper?.classList.add("hidden");
@@ -33,7 +35,6 @@ D.stopResetBtn?.addEventListener("click", () => {
   import("./flow.js").then(m => m.stopAndReset(D, state));
 });
 
-// close on overlay click
 D.settingsModal?.addEventListener("click", (e) => {
   if (e.target === D.settingsModal) closeSettings();
 });
@@ -42,7 +43,7 @@ D.settingsModal?.addEventListener("click", (e) => {
 D.suggestTopicsBtn?.addEventListener("click", (e) => {
   e.preventDefault();
   e.stopPropagation();
-  unlockTTS(); // ✅ still a click, safe to unlock here too
+  unlockTTS();
   fetchTopics(D);
 });
 
@@ -60,18 +61,9 @@ D.hideTopicsBtn?.addEventListener("click", () => {
   D.topicsListWrapper?.classList.add("hidden");
 });
 
-/* ---------- Start session ---------- */
-D.startSessionBtn?.addEventListener("click", () => {
-  unlockTTS(); // ✅ critical
-  startSession(D, state);
-  // Make sure topic is displayed
-  D.debateTopicDisplay?.classList.remove('hidden');
-  D.currentTopicText.textContent = state.topic;
-});
-
 /* ---------- Input controls ---------- */
 D.recordBtn?.addEventListener("click", () => {
-  unlockTTS(); // ✅ critical
+  unlockTTS();
   startRecording(D, state);
 });
 
@@ -87,7 +79,7 @@ D.typeBtn?.addEventListener("click", () => {
 });
 
 D.sendBtn?.addEventListener("click", () => {
-  unlockTTS(); // ✅ critical
+  unlockTTS();
   studentSend(D, state);
 });
 
@@ -119,7 +111,7 @@ D.endDebateBtn?.addEventListener("click", () => {
 });
 
 D.switchSidesBtn?.addEventListener("click", () => {
-  unlockTTS(); // ✅ critical (computer may speak right away after switching)
+  unlockTTS();
   switchSides(D, state);
 });
 
@@ -155,7 +147,7 @@ D.stopSpeakingBtn?.addEventListener("click", () => {
   stopSpeaking();
 });
 
-/* ---------- Timer UI hint (optional) ---------- */
+/* ---------- Timer UI hint ---------- */
 D.modeSelect?.addEventListener("change", () => {
   const mins = selectedTurnMinutes();
   if (D.modeSelect.value === "competition") {
@@ -166,17 +158,9 @@ D.modeSelect?.addEventListener("change", () => {
 /* ---------- Debug helpers ---------- */
 window.__DC_STATE__ = state;
 window.__DC_DOM__ = D;
-
-// Debug hooks for console:
 window.__unlockTTS = unlockTTS;
 window.__stop = stopSpeaking;
-window.__speak = (t) => {
-  unlockTTS();
-  if (typeof window.__internalSpeak === "function") return window.__internalSpeak(t);
-  console.warn("__internalSpeak is missing (need to expose speakText from tts.js)");
-};
 
-// === DEBUG HOOKS (TEMP) ===
 window.__DC = window.__DC || {};
 window.__DC.unlockTTS = unlockTTS;
 window.__DC.stop = stopSpeaking;
@@ -194,13 +178,12 @@ window.__DC.say = (t) => {
 console.log("✅ Debug hooks ready: __DC.say('hello')");
 
 // ============================================================
-// NEW FEATURES: Random Topics, Welcome Screen, Keyboard Shortcuts
+// NEW FEATURES
 // ============================================================
 
-/* ---------- NEW: Enhanced Topics System ---------- */
+/* ---------- Enhanced Topics System ---------- */
 import { getRandomTopic, CATEGORIES, getTopicsByCategory } from './topics.js';
 
-// Current selected category
 let currentCategory = 'all';
 
 function loadRandomTopic(category = null) {
@@ -208,7 +191,6 @@ function loadRandomTopic(category = null) {
   const randomTopic = getRandomTopic(cat);
   state.topic = randomTopic;
   
-  // Update both displays
   const mainTopicDisplay = document.getElementById('mainTopicDisplay');
   if (mainTopicDisplay) {
     mainTopicDisplay.textContent = randomTopic;
@@ -220,7 +202,6 @@ function loadRandomTopic(category = null) {
   console.log('Loaded random topic from', cat, ':', randomTopic);
 }
 
-// Populate category selector
 function populateCategorySelector() {
   const categorySelect = document.getElementById('categorySelect');
   if (categorySelect) {
@@ -234,22 +215,17 @@ function populateCategorySelector() {
   }
 }
 
-// Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
   populateCategorySelector();
   loadRandomTopic();
 });
-
-/* ---------- NEW: Welcome Screen Listeners ---------- */
-
-// Start Debate button (new welcome screen)
+/* ---------- Welcome Screen Listeners ---------- */
 const startDebateBtn = document.getElementById('startDebateBtn');
 if (startDebateBtn) {
   startDebateBtn.addEventListener('click', () => {
     console.log('Start debate clicked');
     unlockTTS();
     
-    // Get topic from the editable div
     const mainTopicDisplay = document.getElementById('mainTopicDisplay');
     if (mainTopicDisplay) {
       state.topic = mainTopicDisplay.textContent.trim();
@@ -262,10 +238,8 @@ if (startDebateBtn) {
       return;
     }
     
-    // Close welcome and start session
     D.welcomeSection?.classList.add('hidden');
     
-    // Make sure topicInput has the value (flow.js needs it!)
     if (D.topicInput) {
       D.topicInput.value = state.topic;
     }
@@ -273,23 +247,32 @@ if (startDebateBtn) {
     console.log('About to call startSession with topic:', state.topic);
     startSession(D, state);
     
-    // Make sure the topic is displayed
     D.debateTopicDisplay?.classList.remove('hidden');
     D.currentTopicText.textContent = state.topic;
+    
+    document.getElementById('debateHeader')?.classList.remove('hidden');
+    
+    // ✅ Show Final Round button (Training mode only)
+    setTimeout(() => {
+      if (window.currentDebateMode === 'training') {
+        const finalBtn = document.getElementById('finalRoundBtn');
+        if (finalBtn) {
+          finalBtn.style.display = 'inline-flex';
+          console.log('✅ Final Round button shown');
+        }
+      }
+    }, 500);
   });
 }
 
-// New topic button
 const newTopicBtn = document.getElementById('newTopicBtn');
 if (newTopicBtn) {
   newTopicBtn.addEventListener('click', () => {
-    console.log('New topic clicked');
     loadRandomTopic();
     showToast(D, 'New topic loaded!', 'success');
   });
 }
 
-// Category selector
 const categorySelect = document.getElementById('categorySelect');
 if (categorySelect) {
   categorySelect.addEventListener('change', () => {
@@ -299,27 +282,22 @@ if (categorySelect) {
   });
 }
 
-// AI Generate Topic button
 const aiTopicBtn = document.getElementById('aiTopicBtn');
 if (aiTopicBtn) {
   aiTopicBtn.addEventListener('click', async () => {
-    console.log('AI topic clicked');
     unlockTTS();
     
     try {
       aiTopicBtn.disabled = true;
       aiTopicBtn.textContent = '🤖 Generating...';
       
-      // Fetch AI-generated topics from API
       const response = await fetch('/topics');
       const data = await response.json();
       
       if (data.topics && data.topics.length > 0) {
-        // Pick a random one from the AI suggestions
         const randomAITopic = data.topics[Math.floor(Math.random() * data.topics.length)];
         state.topic = randomAITopic;
         
-        // Update the editable display
         const mainTopicDisplay = document.getElementById('mainTopicDisplay');
         if (mainTopicDisplay) {
           mainTopicDisplay.textContent = randomAITopic;
@@ -343,7 +321,6 @@ if (aiTopicBtn) {
 /* ---------- Inline Topic Editing ---------- */
 const mainTopicDisplay = document.getElementById('mainTopicDisplay');
 if (mainTopicDisplay) {
-  // Update state when user edits the topic inline
   mainTopicDisplay.addEventListener('input', () => {
     state.topic = mainTopicDisplay.textContent.trim();
     if (D.topicInput) {
@@ -351,35 +328,29 @@ if (mainTopicDisplay) {
     }
   });
   
-  // Prevent Enter key from creating new lines
   mainTopicDisplay.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      mainTopicDisplay.blur(); // Unfocus after pressing Enter
+      mainTopicDisplay.blur();
     }
   });
   
-  // Visual feedback on focus
   mainTopicDisplay.addEventListener('focus', () => {
     mainTopicDisplay.style.outline = '2px solid #4CAF50';
   });
   
   mainTopicDisplay.addEventListener('blur', () => {
     mainTopicDisplay.style.outline = 'none';
-    // Validate minimum length
     if (state.topic.length < 5) {
       import('./ui.js').then(({ showError }) => {
         showError('Topic must be at least 5 characters long');
       });
-      loadRandomTopic(); // Reset to a valid random topic
+      loadRandomTopic();
     }
   });
 }
-        
-    
-/* ---------- NEW: Keyboard Shortcuts ---------- */
 
-// Enter to send
+/* ---------- Keyboard Shortcuts ---------- */
 D.manualInput?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
     e.preventDefault();
@@ -387,7 +358,6 @@ D.manualInput?.addEventListener('keydown', (e) => {
   }
 });
 
-// Esc to stop speaking
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     stopSpeaking();
@@ -395,11 +365,10 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* ---------- NEW: Argument Validation ---------- */
+/* ---------- Argument Validation ---------- */
 export function validateArgument(text) {
   const words = text.trim().split(/\s+/);
   
-  // Check minimum words
   if (words.length < 10) {
     return {
       valid: false,
@@ -407,7 +376,6 @@ export function validateArgument(text) {
     };
   }
   
-  // Check for meaningless patterns
   const meaninglessPatterns = /^(hi|hello|hey|lets start|let's start|ok|okay|yes|no|start|begin)$/i;
   if (meaninglessPatterns.test(text.trim())) {
     return {
@@ -419,12 +387,9 @@ export function validateArgument(text) {
   return { valid: true };
 }
 
-console.log('✅ New features loaded: Random topics, keyboard shortcuts, validation');
+console.log('✅ New features loaded');
 
-// Add this to main.js or run in browser console to debug
-
-console.log('=== HELP BUTTON DEBUG ===');
-
+/* ---------- Help Modal ---------- */
 const helpBtn = document.getElementById('helpBtn');
 const helpModal = document.getElementById('helpModal');
 const helpClose = document.getElementById('helpClose');
@@ -444,7 +409,6 @@ if (helpClose) {
   });
 }
 
-// Close on background click
 if (helpModal) {
   helpModal.addEventListener('click', (e) => {
     if (e.target === helpModal) {
@@ -452,6 +416,8 @@ if (helpModal) {
       helpModal.classList.add('hidden');
     }
   });
+}
+
 if (getHelpBtn) {
   getHelpBtn.addEventListener('click', async () => {
     const helpContent = document.getElementById('helpContent');
@@ -472,45 +438,35 @@ if (getHelpBtn) {
       helpContent.innerHTML = '❌ Error generating help. Please try again.';
     }
   });
-}}
+}
 
 /* ==========================================
-   MODE PICKER + STANCE PICKER + SETTINGS
+   MODE PICKER + STANCE PICKER
    ========================================== */
 
-// ── Track current mode ──
-let currentDebateMode = 'training';
-
-// ── Mode buttons on welcome screen ──
 document.getElementById('modeTrainingBtn')?.addEventListener('click', () => {
-  currentDebateMode = 'training';
+  window.currentDebateMode = 'training';
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('modeTrainingBtn').classList.add('active');
-  // Sync hidden select for flow.js
   const modeSelect = document.getElementById('modeSelect');
   if (modeSelect) modeSelect.value = 'practice';
-  // Update start button
   const startBtn = document.getElementById('startDebateBtn');
   if (startBtn) startBtn.textContent = '▶️ Start Debate';
 });
 
 document.getElementById('modeCompetitionBtn')?.addEventListener('click', () => {
-  currentDebateMode = 'competition';
+  window.currentDebateMode = 'competition';
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('modeCompetitionBtn').classList.add('active');
-  // Sync hidden select for flow.js
   const modeSelect = document.getElementById('modeSelect');
   if (modeSelect) modeSelect.value = 'competition';
-  // Update start button
   const startBtn = document.getElementById('startDebateBtn');
   if (startBtn) startBtn.textContent = '🏆 Start Competition';
 });
 
-// ── Stance buttons on welcome screen ──
 document.getElementById('stanceForBtn')?.addEventListener('click', () => {
   document.querySelectorAll('.stance-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('stanceForBtn').classList.add('active');
-  // Sync hidden select for flow.js
   const stanceSelect = document.getElementById('stanceSelect');
   if (stanceSelect) stanceSelect.value = 'PRO';
 });
@@ -518,12 +474,10 @@ document.getElementById('stanceForBtn')?.addEventListener('click', () => {
 document.getElementById('stanceAgainstBtn')?.addEventListener('click', () => {
   document.querySelectorAll('.stance-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('stanceAgainstBtn').classList.add('active');
-  // Sync hidden select for flow.js
   const stanceSelect = document.getElementById('stanceSelect');
   if (stanceSelect) stanceSelect.value = 'CON';
 });
 
-// ── Settings modal: switch sections when opened ──
 function updateSettingsForMode(mode) {
   const badge = document.getElementById('settingsModeBadge');
   const trainingSections = document.querySelector('.settings-sections-training');
@@ -537,39 +491,33 @@ function updateSettingsForMode(mode) {
     if (badge) { badge.textContent = '🏆 Competition'; badge.className = 'settings-mode-badge competition'; }
     if (trainingSections) trainingSections.style.display = 'none';
     if (competitionSections) competitionSections.style.display = '';
-    // init sliders
     setTimeout(() => {
       document.querySelectorAll('.settings-slider').forEach(fillSlider);
     }, 10);
   }
 }
 
-// Override openSettings to also sync mode
-const _origOpenSettings = window.__openSettings;
 D.settingsBtn?.addEventListener('click', () => {
-  updateSettingsForMode(currentDebateMode);
-}, true);
-D.openSetupBtn?.addEventListener('click', () => {
-  updateSettingsForMode(currentDebateMode);
+  updateSettingsForMode(window.currentDebateMode);
 }, true);
 
-// ── Difficulty cards ──
+D.openSetupBtn?.addEventListener('click', () => {
+  updateSettingsForMode(window.currentDebateMode);
+}, true);
+
 document.querySelectorAll('.diff-card').forEach(card => {
   card.addEventListener('click', () => {
     document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('active'));
     card.classList.add('active');
-    // Sync hidden select for flow.js
     const diffSelect = document.getElementById('difficultySelect');
     if (diffSelect) diffSelect.value = card.dataset.level;
   });
 });
 
-// ── Close settings - also close button 2 ──
 document.getElementById('closeModalBtn')?.addEventListener('click', () => {
   D.settingsModal?.classList.remove('active');
 });
 
-// ── Slider fill helpers for competition sliders ──
 function fillSlider(el) {
   const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
   el.style.setProperty('--pct', pct + '%');
@@ -585,7 +533,6 @@ document.getElementById('argTimeSlider')?.addEventListener('input', (e) => {
   fillSlider(e.target);
   const display = document.getElementById('argTimeDisplay');
   if (display) display.textContent = fmtSeconds(parseInt(e.target.value));
-  // Sync minutes radio for flow.js (approximate)
   const mins = Math.round(parseInt(e.target.value) / 60);
   const radio = document.querySelector(`input[name="turnMinutes"][value="${Math.max(1, Math.min(5, mins))}"]`);
   if (radio) radio.checked = true;
@@ -597,31 +544,17 @@ document.getElementById('warnTimeSlider')?.addEventListener('input', (e) => {
   if (display) display.textContent = e.target.value + 's left';
 });
 
-// Init sliders
 document.querySelectorAll('.settings-slider').forEach(fillSlider);
 
-console.log('✅ Mode picker, stance picker, and settings loaded');
+console.log('✅ Mode picker and settings loaded');
 
-/* ==========================================
-   WELCOME SETTINGS BUTTON + HEADER CONTROL
-   ========================================== */
-
-// Welcome screen gear button opens settings
+/* ---------- Welcome Settings Button ---------- */
 document.getElementById('welcomeSettingsBtn')?.addEventListener('click', () => {
   unlockTTS();
-  updateSettingsForMode(currentDebateMode);
+  updateSettingsForMode(window.currentDebateMode);
   D.settingsModal?.classList.add('active');
 });
 
-// When debate starts: show debate header, hide welcome gear
-const _origStartDebate = document.getElementById('startDebateBtn');
-if (_origStartDebate) {
-  _origStartDebate.addEventListener('click', () => {
-    document.getElementById('debateHeader')?.classList.remove('hidden');
-    document.getElementById('welcomeSection')?.classList.add('hidden');
-  }, true); // capture = true, runs before other listeners
-}
-// Close Settings with Done button
 document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
   const settingsModal = document.getElementById('settingsModal');
   if (settingsModal) {
@@ -630,31 +563,19 @@ document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
   }
 });
 
-console.log('✅ Done button handler added');
-// Close Settings modal
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-if (closeSettingsBtn) {
-  closeSettingsBtn.addEventListener('click', () => {
-    const settingsModal = document.getElementById('settingsModal');
-    if (settingsModal) {
-      settingsModal.classList.remove('active');
-      settingsModal.classList.add('hidden');
-    }
-  });
-  // ==========================================
-// GENERATE TALKING POINTS FEATURE
-// Add to main.js
-// ==========================================
+console.log('✅ Settings handlers ready');
+
+/* ==========================================
+   GENERATE TALKING POINTS
+   ========================================== */
 
 const generateTalkingPointsBtn = document.getElementById('generateTalkingPointsBtn');
 const talkingPointsContainer = document.getElementById('talkingPointsContainer');
 const talkingPointsContent = document.getElementById('talkingPointsContent');
 const closeTalkingPointsBtn = document.getElementById('closeTalkingPointsBtn');
 
-// Generate Talking Points
 if (generateTalkingPointsBtn) {
   generateTalkingPointsBtn.addEventListener('click', async () => {
-    // Get current debate topic and stance
     const topicElement = document.querySelector('.debate-topic-text') || 
                         document.querySelector('[contenteditable="true"]');
     const topic = topicElement ? topicElement.textContent.trim() : '';
@@ -667,23 +588,20 @@ if (generateTalkingPointsBtn) {
       return;
     }
     
-    // Show loading state
     generateTalkingPointsBtn.disabled = true;
     generateTalkingPointsBtn.classList.add('loading');
     
-    // Show container with loading message
     talkingPointsContainer.classList.remove('hidden');
     talkingPointsContent.innerHTML = '<div class="talking-points-loading">Generating talking points...</div>';
     
     try {
-      // Call your /help endpoint
       const response = await fetch('/help', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: `Generate 3-5 strong talking points ${stance === 'PRO' ? 'FOR' : 'AGAINST'} this debate topic: "${topic}". Format as a numbered list with brief explanations.`
         }),
-        signal: AbortSignal.timeout(15000) // 15 second timeout
+        signal: AbortSignal.timeout(15000)
       });
       
       if (!response.ok) {
@@ -692,45 +610,31 @@ if (generateTalkingPointsBtn) {
       
       const data = await response.json();
       
-      // Try different response formats
-// Extract response from different formats
-let responseText = '';
+      let responseText = '';
+      if (data.response) {
+        responseText = data.response;
+      } else if (data.reply) {
+        responseText = data.reply;
+      } else if (data.message) {
+        responseText = data.message;
+      } else if (data.content) {
+        responseText = data.content;
+      }
 
-if (data.response) {
-  responseText = data.response;
-} else if (data.reply) {
-  responseText = data.reply;
-} else if (data.message) {
-  responseText = data.message;
-} else if (data.content) {
-  responseText = data.content;
-}
+      responseText = responseText
+        .replace(/^["']|["']$/g, '')
+        .replace(/\\n\\n/g, '\n\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .trim();
 
-// Clean up the text - remove JSON formatting and fix line breaks
-responseText = responseText
-  .replace(/^["']|["']$/g, '')  // Remove quotes
-  .replace(/\\n\\n/g, '\n\n')    // Fix double line breaks
-  .replace(/\\n/g, '\n')         // Fix single line breaks
-  .replace(/\\"/g, '"')          // Fix escaped quotes
-  .trim();
-
-if (responseText) {
-  talkingPointsContent.innerHTML = `
-    <div style="white-space: pre-wrap; line-height: 1.8;">${responseText}</div>
-  `;
-} else {
-  console.log('Help endpoint returned:', data);
-  throw new Error('No response received');
-}
-if (responseText && responseText !== '{}') {
-  talkingPointsContent.innerHTML = `
-    <div style="white-space: pre-wrap;">${responseText}</div>
-  `;
-} else {
-  // Show what we actually got for debugging
-  console.log('Help endpoint returned:', data);
-  throw new Error('No response received');
-}
+      if (responseText && responseText !== '{}') {
+        talkingPointsContent.innerHTML = `
+          <div style="white-space: pre-wrap; line-height: 1.8;">${responseText}</div>
+        `;
+      } else {
+        throw new Error('No response received');
+      }
       
     } catch (error) {
       console.error('Error generating talking points:', error);
@@ -740,14 +644,12 @@ if (responseText && responseText !== '{}') {
         </div>
       `;
     } finally {
-      // Reset button state
       generateTalkingPointsBtn.disabled = false;
       generateTalkingPointsBtn.classList.remove('loading');
     }
   });
 }
 
-// Close Talking Points
 if (closeTalkingPointsBtn) {
   closeTalkingPointsBtn.addEventListener('click', () => {
     if (talkingPointsContainer) {
@@ -758,4 +660,36 @@ if (closeTalkingPointsBtn) {
 
 console.log('✅ Generate Talking Points ready');
 
+/* ==========================================
+   FINAL ROUND BUTTON
+   ========================================== */
+
+window.isFinalRound = false;
+window.finalRoundTurnsRemaining = 0;
+
+const finalRoundBtn = document.getElementById('finalRoundBtn');
+if (finalRoundBtn) {
+  finalRoundBtn.addEventListener('click', function() {
+    if (window.isFinalRound) return;
+    
+    console.log('🏁 Final Round clicked!');
+    
+    window.isFinalRound = true;
+    window.finalRoundTurnsRemaining = 1;
+    
+    const conversationSection = document.getElementById('conversationSection');
+    if (conversationSection) {
+      const indicator = document.createElement('div');
+      indicator.className = 'final-round-mode';
+      indicator.innerHTML = '🏁 Final Round! Each side gives one closing argument';
+      conversationSection.appendChild(indicator);
+      conversationSection.scrollTop = conversationSection.scrollHeight;
+    }
+    
+    this.style.display = 'none';
+    showToast(D, 'Final Round started! Give your closing argument.', 'info');
+  });
 }
+
+
+console.log('✅ Final Round Button ready');
