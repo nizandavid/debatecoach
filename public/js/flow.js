@@ -285,7 +285,7 @@ const reply = await sendToAI(dom, state, lastStudent, {
         if (endBtn) {
           endBtn.click();
         }
-      }, 2000);
+      }, 10000);
       return;
     }
   }

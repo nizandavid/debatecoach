@@ -20,12 +20,25 @@ initTTS(D, state);
 /* ---------- Settings modal open/close ---------- */
 function openSettings() {
   unlockTTS();
-  D.settingsModal?.classList.add("active");
+  const modal = D.settingsModal || document.getElementById('settingsModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      modal.classList.add('active');
+    }, 10);
+  }
   D.topicsListWrapper?.classList.add("hidden");
 }
 
 function closeSettings() {
-  D.settingsModal?.classList.remove("active");
+  const modal = D.settingsModal || document.getElementById('settingsModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    setTimeout(() => {
+      modal.style.display = '';
+    }, 100);
+  }
 }
 
 D.settingsBtn?.addEventListener("click", openSettings);
