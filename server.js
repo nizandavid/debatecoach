@@ -147,7 +147,7 @@ function prepSystemPrompt({ topic, stance, difficulty }) {
   ].join("\n");
 }
 
-function askSystemPrompt({ topic, stance, difficulty, isComputerFinalArgument = false }) {
+function askSystemPrompt({ topic, stance, difficulty, isComputerFinalArgument = false, isSummary = false }) {
   const level =
     difficulty === "Easy"
       ? "Reply in simple English, short sentences."
@@ -155,10 +155,18 @@ function askSystemPrompt({ topic, stance, difficulty, isComputerFinalArgument = 
         ? "Reply with stronger logic, more nuance, and sharper rebuttals."
         : "Reply in clear English with solid reasoning.";
 
-  // 🆕 Different instructions for final argument vs regular arguments
-  const responseStyle = isComputerFinalArgument
-    ? "This is your FINAL argument before closing statements. Be concise (3-5 sentences): briefly restate your 2-3 strongest points, then end with a powerful concluding statement. Do NOT ask a follow-up question - make a declarative final statement instead."
-    : "Be concise and sharp: 2–6 sentences. Ask EXACTLY ONE follow-up question at the end.";
+  // 🆕 Different instructions based on turn type
+  let responseStyle;
+  if (isSummary) {
+    // Summary rounds - no question, just summarize
+    responseStyle = "This is your CLOSING SUMMARY. Briefly restate your 2-3 strongest points and end with a powerful concluding statement. Do NOT ask any questions - this is your final word.";
+  } else if (isComputerFinalArgument) {
+    // Final argument before summaries
+    responseStyle = "This is your FINAL argument before closing statements. Be concise (3-5 sentences): briefly restate your 2-3 strongest points, then end with a powerful concluding statement. Do NOT ask a follow-up question - make a declarative final statement instead.";
+  } else {
+    // Regular arguments - ask a question
+    responseStyle = "Be concise and sharp: 2–6 sentences. Ask EXACTLY ONE follow-up question at the end.";
+  }
 
   return [
     "You simulate a live school debate.",
@@ -305,13 +313,15 @@ app.post("/ask", async (req, res) => {
     const difficulty = sanitizeDifficulty(req.body?.difficulty);
     const userText = safeStr(req.body?.userText, "").trim();
     const isComputerStarting = req.body?.isComputerStarting || false;
-    const isComputerFinalArgument = req.body?.isComputerFinalArgument || false; // 🆕
+    const isComputerFinalArgument = req.body?.isComputerFinalArgument || false;
+    const isSummary = req.body?.isSummary || false; // 🆕
 
     const system = askSystemPrompt({ 
       topic, 
       stance, 
       difficulty,
-      isComputerFinalArgument // 🆕
+      isComputerFinalArgument,
+      isSummary // 🆕
     });
 
     let messages;

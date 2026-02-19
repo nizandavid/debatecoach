@@ -59,6 +59,7 @@ const res = await fetch("/ask", {
     userText: payloadText,
     isComputerStarting: opts.isComputerStarting || false,
     isComputerFinalArgument: isComputerFinalArgument,
+    isSummary: opts.isSummary || false, // 🆕 Pass summary flag
   }),
 });
 
