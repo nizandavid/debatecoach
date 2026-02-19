@@ -4,26 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DebateCoach - Practice Debate with AI</title>
-  <link rel="stylesheet" href="/styles.css?v=3" />
- 
-<style>
-/* DEBATE SCREEN OVERRIDES */
-.stop-reset-btn, #stopResetBtn { display: none !important; }
-#downloadTranscriptBtn.hidden { display: none !important; }
-
-/* Larger header logo */
-.header .logo { width: 70px !important; height: 70px !important; }
-.header .logo img { width: 70px !important; height: 70px !important; }
-
-/* Center debate topic */
-.debate-topic-display { text-align: center !important; font-size: 20px !important; font-weight: 700 !important; padding: 20px !important; }
-
-/* Center buttons */
-.reset-section { display: flex !important; gap: 12px !important; justify-content: center !important; margin: 16px auto !important; }
-.reset-section button { min-width: 170px !important; height: 50px !important; }
-</style>
-
-
+  <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/new-features.css" />
 </head>
 <body>
@@ -83,11 +64,10 @@
             </select>
           </div>
           
-          <div class="topic-display" id="mainTopicDisplay" contenteditable="true">Loading topic...</div>
+          <div class="topic-display" id="mainTopicDisplay">Loading topic...</div>
           <div class="topic-actions">
-            <button class="btn btn-outline" id="newTopicBtn">🎲 Random</button>
+            <button class="btn btn-outline" id="newTopicBtn">🎲 New Topic</button>
             <button class="btn btn-outline btn-ai" id="aiTopicBtn">🤖 AI Topic</button>
-            <button class="btn btn-outline" id="editTopicBtn">📝 Edit</button>
           </div>
         </div>
 
@@ -285,75 +265,52 @@
       <div class="settings-body-scroll">
 
         <!-- TRAINING SECTIONS -->
-<div class="settings-sections-training">
-  
-  <!-- 1. AI DIFFICULTY - FIRST -->
-  <div class="settings-section">
-    <div class="settings-section-title">🤖 AI Opponent</div>
-    <div class="diff-grid">
-      <button class="diff-card" data-level="Easy" id="easyBtn">
-        <span class="diff-icon">😊</span>
-        <span class="diff-name">Easy</span>
-        <span class="diff-desc">Simple, supportive</span>
-      </button>
-      <button class="diff-card active" data-level="Medium" id="mediumBtn">
-        <span class="diff-icon">🧠</span>
-        <span class="diff-name">Medium</span>
-        <span class="diff-desc">Balanced challenge</span>
-      </button>
-      <button class="diff-card" data-level="Hard" id="hardBtn">
-        <span class="diff-icon">🔥</span>
-        <span class="diff-name">Hard</span>
-        <span class="diff-desc">No mercy</span>
-      </button>
-    </div>
-  </div>
+        <div class="settings-sections-training">
+          <div class="settings-section">
+            <div class="settings-section-title">🎤 Speech &amp; Voice</div>
+            <div class="settings-info-box">
+              Free practice — no time limit. Debate continues until you click <strong>End Session</strong> or <strong>Final Round</strong>.
+            </div>
+            <div class="settings-row">
+              <div class="form-group">
+                <label class="form-label">Auto-speak AI responses</label>
+                <select class="form-select" id="autoSpeakSelect">
+                  <option value="true" selected>On</option>
+                  <option value="false">Off</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Voice</label>
+                <select class="form-select" id="voiceSelect">
+                  <option value="">(System Default)</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+              <button class="btn btn-secondary" id="testVoiceBtn">🔊 Test voice</button>
+              <button class="btn btn-secondary" id="stopSpeakingBtn">🔇 Stop Speaking</button>
+            </div>
+          </div>
 
-  <!-- 2. SESSION END OPTIONS -->
-  <div class="settings-section">
-    <div class="settings-section-title">🔚 Session End Options</div>
-    <div class="settings-toggle-row">
-      <label class="form-label">Show "Final Round" button during debate</label>
-      <label class="toggle-switch">
-        <input type="checkbox" id="finalRoundToggle" checked>
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <p class="settings-hint">When clicked, both sides give one closing summary argument, then session ends.</p>
-    <div class="settings-toggle-row" style="margin-top:12px;">
-      <label class="form-label">Show AI feedback summary at end</label>
-      <label class="toggle-switch">
-        <input type="checkbox" id="feedbackToggle" checked>
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-  </div>
-
-  <!-- 3. SOUND & VOICE - LAST -->
-  <div class="settings-section">
-    <div class="settings-section-title">🎤 Sound & Voice</div>
-    <div class="settings-row">
-      <div class="form-group">
-        <label class="form-label">Auto-speak AI responses</label>
-        <select class="form-select" id="autoSpeakSelect">
-          <option value="true" selected>On</option>
-          <option value="false">Off</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Voice</label>
-        <select class="form-select" id="voiceSelect">
-          <option value="">(System Default)</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
-      <button class="btn btn-secondary" id="testVoiceBtn">🔊 Test voice</button>
-      <button class="btn btn-secondary" id="stopSpeakingBtn">🔇 Stop Speaking</button>
-    </div>
-  </div>
-  
-</div>
+          <div class="settings-section">
+            <div class="settings-section-title">🔚 Session End Options</div>
+            <div class="settings-toggle-row">
+              <label class="form-label">Show "Final Round" button during debate</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="finalRoundToggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <p class="settings-hint">When clicked, both sides give one closing summary argument, then session ends.</p>
+            <div class="settings-toggle-row" style="margin-top:12px;">
+              <label class="form-label">Show AI feedback summary at end</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="feedbackToggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
 
         <!-- COMPETITION SECTIONS -->
         <div class="settings-sections-competition" style="display:none">
@@ -438,7 +395,26 @@
           </div>
         </div>
 
-
+        <!-- SHARED: AI Difficulty -->
+        <div class="settings-section">
+          <div class="settings-section-title">🤖 AI Difficulty</div>
+          <div class="diff-grid">
+            <button class="diff-card" data-level="Easy">
+              <span class="diff-icon">😊</span>
+              <span class="diff-name">Easy</span>
+              <span class="diff-desc">Simple, supportive</span>
+            </button>
+            <button class="diff-card active" data-level="Medium">
+              <span class="diff-icon">🧠</span>
+              <span class="diff-name">Medium</span>
+              <span class="diff-desc">Balanced challenge</span>
+            </button>
+            <button class="diff-card" data-level="Hard">
+              <span class="diff-icon">🔥</span>
+              <span class="diff-name">Hard</span>
+              <span class="diff-desc">No mercy</span>
+            </button>
+          </div>
           <!-- Hidden selects for flow.js compatibility -->
           <select id="difficultySelect" style="display:none;">
             <option value="Easy">Easy</option>

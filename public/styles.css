@@ -2941,161 +2941,80 @@ div#helpModal.active {
   background: linear-gradient(135deg, rgba(240, 147, 251, 0.15), rgba(245, 87, 108, 0.15));
   border: 2px solid rgba(245, 87, 108, 0.3);
   border-radius: 20px;
-  
-/* ==========================================
-   COMPACT WELCOME SCREEN - CSS UPDATES
-   Add these styles to the END of styles.css
-   ========================================== */
-
-/* Compact Welcome Card */
-.welcome-card {
-  padding: 30px 28px !important; /* Reduced from 50px 40px */
-  border-radius: 24px !important; /* Reduced from 40px */
 }
-
-/* Smaller Logo */
-.welcome-logo {
-  width: 80px !important; /* Reduced from 120px */
-  height: 80px !important;
-  margin-bottom: 16px !important; /* Reduced from 20px */
-}
-
-.welcome-logo img {
-  width: 80px !important;
-  height: 80px !important;
-}
-
-/* Compact Title */
-.welcome-title {
-  font-size: 28px !important; /* Reduced from 42px */
-  margin-bottom: 20px !important; /* Increased from 12px - removed subtitle */
-  font-weight: 700 !important; /* Reduced from 800 */
-}
-
-/* Hide Subtitle - Makes it More Compact */
-.welcome-subtitle {
-  display: none !important;
-}
-
-/* Topic Display - BOLD & CLEAR */
-.topic-display {
-  font-size: 18px !important; /* Increased from 17px */
-  font-weight: 700 !important; /* BOLD - was 500 */
-  padding: 18px !important; /* Reduced from 24px */
-  margin-bottom: 12px !important; /* Increased from 10px */
-  min-height: 70px !important; /* Reduced from 80px */
-  line-height: 1.5 !important; /* Tighter */
-}
-
-/* Topic Buttons - WITH TEXT */
-.topic-actions {
-  gap: 8px !important; /* Reduced from 12px */
-  justify-content: center;
-  margin-bottom: 20px !important; /* Reduced from 25px */
-}
-
-.topic-actions .btn {
-  padding: 8px 16px !important; /* Compact but with room for text */
-  font-size: 13px !important; /* Smaller text */
-  font-weight: 600 !important;
-  flex: 0 1 auto; /* Don't stretch */
-  min-width: auto;
-}
-
-/* Hide Category Selector - Takes Too Much Space */
-.category-selector {
-  display: none !important;
-}
-
-/* Compact Mode/Stance Pickers */
-.picker-label {
-  font-size: 13px !important; /* Reduced from 14px */
-  margin-bottom: 8px !important; /* Reduced from 12px */
-}
-
-.mode-picker-section,
-.stance-picker-section {
-  margin-bottom: 16px !important; /* Reduced from 22px */
-}
-
-.mode-btn,
-.stance-btn {
-  padding: 12px 10px !important; /* Reduced from 16px 12px */
-  border-radius: 14px !important; /* Reduced from 18px */
-  gap: 4px !important; /* Reduced from 5px */
-  min-height: auto;
-}
-
-.mode-icon,
-.stance-icon {
-  font-size: 1.5rem !important; /* Reduced from 1.8rem */
-}
-
-.mode-name,
-.stance-name {
-  font-size: 0.9rem !important; /* Reduced from 0.95rem */
-  font-weight: 700 !important; /* Reduced from 800 */
-}
-
-.mode-desc,
-.stance-desc {
-  font-size: 0.65rem !important; /* Reduced from 0.7rem */
-  line-height: 1.2 !important;
-}
-
-/* Compact Start Button */
-.btn-large {
-  padding: 14px 28px !important; /* Reduced from 18px 32px */
-  font-size: 17px !important; /* Reduced from 18px */
-  margin: 16px 0 !important; /* Reduced */
-  border-radius: 14px !important; /* Smaller radius */
-}
-
-/* Compact Quick Tips */
-.quick-tips {
-  margin-top: 12px !important; /* Reduced from 20px */
-  gap: 8px !important;
-}
-
-.tip {
-  font-size: 11px !important; /* Reduced from 13px */
-  padding: 6px 10px !important; /* Reduced from 8px 12px */
-}
-
-/* Mobile Adjustments */
-@media (max-width: 768px) {
-  .welcome-card {
-    padding: 24px 20px !important;
-  }
-  
-  .welcome-title {
-    font-size: 24px !important;
-  }
-  
-  .topic-display {
-    font-size: 16px !important;
-    padding: 14px !important;
-  }
-  
-  .mode-btn,
-  .stance-btn {
-    padding: 10px 8px !important;
-  }
-  
-  .mode-name,
-  .stance-name {
-    font-size: 0.85rem !important;
-  }
-  
-  .mode-desc,
-  .stance-desc {
-    font-size: 0.6rem !important;
-  }
 }
 
 /* ==========================================
-   COMPACT METRICS
-   Before: ~1100px height
-   After: ~620px height
-   Improvement: 44% smaller!
+   COMPACT UI OVERRIDES - FINAL
+   All !important styles to override defaults
    ========================================== */
+
+/* WELCOME SCREEN - COMPACT */
+.welcome-card { padding: 30px 28px !important; border-radius: 24px !important; }
+.welcome-logo { width: 120px !important; height: 120px !important; margin-bottom: -15px !important; }
+.welcome-logo img { width: 120px !important; height: 120px !important; }
+.welcome-title { font-size: 28px !important; margin-bottom: 20px !important; font-weight: 700 !important; }
+.welcome-subtitle { display: none !important; }
+.topic-display { font-size: 18px !important; font-weight: 700 !important; padding: 18px !important; margin-bottom: 12px !important; min-height: 70px !important; line-height: 1.5 !important; cursor: text !important; user-select: text !important; }
+.topic-display:focus { outline: 2px solid #4CAF50 !important; background: rgba(255, 255, 255, 0.9) !important; }
+.category-selector { display: none !important; }
+.topic-actions { justify-content: center !important; gap: 12px !important; }
+.mode-btn, .stance-btn { padding: 12px 10px !important; border-radius: 14px !important; }
+.mode-icon, .stance-icon { font-size: 1.5rem !important; }
+.mode-name, .stance-name { font-size: 0.9rem !important; }
+.mode-desc, .stance-desc { font-size: 0.65rem !important; }
+.quick-tips { display: flex !important; flex-direction: column !important; gap: 0px !important; margin-top: 8px !important; }
+.tip { padding: 6px 10px !important; margin: 0 !important; line-height: 1.3 !important; margin-top: -5px !important; }
+.tip:first-child { margin-top: 0 !important; }
+
+/* DEBATE SCREEN */
+#stopResetBtn { display: none !important; }
+
+/* Hide Download in header - show only after feedback */
+.header #downloadTranscriptBtn { display: none !important; }
+
+/* Larger logo in header */
+.header .logo { width: 70px !important; height: 70px !important; }
+.header .logo img { width: 70px !important; height: 70px !important; }
+
+/* Center debate topic */
+.debate-topic-display { text-align: center !important; font-size: 20px !important; font-weight: 700 !important; padding: 20px !important; }
+
+/* Move action buttons BETWEEN conversation and input sections */
+.reset-section { 
+  display: flex !important; 
+  gap: 12px !important; 
+  justify-content: center !important; 
+  align-items: center !important; 
+  margin: 20px auto !important; 
+  padding: 0 !important;
+  /* Remove any positioning that puts it at bottom */
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+/* Equal button sizing */
+.reset-section button,
+#resetSessionBtn,
+#finalRoundBtn,
+#endDebateBtn { 
+  min-width: 170px !important; 
+  height: 50px !important; 
+  display: inline-flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 6px !important; 
+  font-size: 14px !important; 
+}
+
+/* Show download button ONLY in feedback card */
+.card #downloadTranscriptBtn { 
+  display: inline-flex !important; 
+}
+
+/* SETTINGS */
+.settings-modal-new { max-width: 520px !important; max-height: 85vh !important; }
+.settings-section { padding: 16px !important; margin-bottom: 12px !important; }
+.settings-section-title { font-size: 15px !important; margin-bottom: 12px !important; }
