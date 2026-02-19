@@ -334,12 +334,31 @@ if (aiTopicBtn) {
 /* ---------- Inline Topic Editing ---------- */
 const mainTopicDisplay = document.getElementById('mainTopicDisplay');
 if (mainTopicDisplay) {
+  // Make it editable on click
   mainTopicDisplay.addEventListener('input', () => {
     state.topic = mainTopicDisplay.textContent.trim();
     if (D.topicInput) {
       D.topicInput.value = state.topic;
     }
   });
+  
+  // Edit button - focus and highlight text
+  const editTopicBtn = document.getElementById('editTopicBtn');
+  if (editTopicBtn) {
+    editTopicBtn.addEventListener('click', () => {
+      unlockTTS();
+      mainTopicDisplay.focus();
+      
+      // Select all text
+      const range = document.createRange();
+      range.selectNodeContents(mainTopicDisplay);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      showToast(D, '✏️ Edit your topic!', 'info');
+    });
+  }
   
   mainTopicDisplay.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
