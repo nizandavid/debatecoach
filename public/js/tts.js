@@ -85,18 +85,17 @@ export function initTTS(D, state) {
 }
 
 export function unlockTTS() {
-  if (unlocked) {
-    return;
-  }
-
+  // 🔧 Always execute unlock, even if already unlocked
+  // Safari sometimes "forgets" the unlock after opening modals
+  
   try {
     const u = new SpeechSynthesisUtterance(" ");
     u.volume = 0;
     speechSynthesis.speak(u);
     unlocked = true;
-    console.log("TTS unlocked");
+    console.log("✅ TTS unlocked");
   } catch (e) {
-    console.error("Unlock failed");
+    console.error("❌ TTS unlock failed:", e);
   }
 }
 

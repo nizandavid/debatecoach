@@ -36,9 +36,18 @@ export async function fetchTopics(dom) {
 
 export async function sendToAI(dom, state, userText, opts = {}) {
   try {
-    const payloadText = opts.isSummary
-  ? `This is your closing summary. Keep it concise and strong.\n\n${userText}`
-  : userText;
+    // 🎯 Detect if this is computer's final argument
+    const isComputerFinalArgument = opts.isComputerFinalArgument || false;
+    
+    let payloadText;
+    if (opts.isSummary) {
+      payloadText = `This is your closing summary. Keep it concise and strong.\n\n${userText}`;
+    } else if (isComputerFinalArgument) {
+      // 🆕 Special instructions for final argument
+      payloadText = `This is your FINAL argument before closing statements. Summarize your main points and make a strong concluding statement. Do NOT ask a follow-up question.\n\n${userText}`;
+    } else {
+      payloadText = userText;
+    }
 
 const res = await fetch("/ask", {
   method: "POST",
@@ -49,6 +58,7 @@ const res = await fetch("/ask", {
     difficulty: state.difficulty,
     userText: payloadText,
     isComputerStarting: opts.isComputerStarting || false,
+    isComputerFinalArgument: isComputerFinalArgument,
   }),
 });
 

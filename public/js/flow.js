@@ -11,9 +11,10 @@ import { updateTimerDisplay, resetTimerWarnings, setupTimerControls, showTimerPa
 
 // Argument Validation
 function validateArgument(text) {
-  const words = text.trim().split(/\s+/);
+  const trimmed = text.trim();
+  const words = trimmed.split(/\s+/);
   
-  // Check minimum words
+  // 1. Check minimum words
   if (words.length < 10) {
     return {
       valid: false,
@@ -21,12 +22,57 @@ function validateArgument(text) {
     };
   }
   
-  // Check for meaningless patterns (greetings, commands)
+  // 2. Check maximum words (prevent huge copy-paste)
+  if (words.length > 500) {
+    return {
+      valid: false,
+      message: '⚠️ Your argument is too long (max 500 words). Please be more concise.'
+    };
+  }
+  
+  // 3. Check for meaningless patterns (greetings, commands)
   const meaninglessPatterns = /^(hi|hello|hey|let'?s start|ok|okay|yes|no|start|begin)$/i;
-  if (meaninglessPatterns.test(text.trim())) {
+  if (meaninglessPatterns.test(trimmed)) {
     return {
       valid: false,
       message: '⚠️ Please provide an actual argument about the topic, not just a greeting or command.'
+    };
+  }
+  
+  // 4. Check for excessive repetition (same word more than 30% of text)
+  const wordFrequency = {};
+  words.forEach(word => {
+    const normalized = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (normalized.length > 2) { // Only count words longer than 2 chars
+      wordFrequency[normalized] = (wordFrequency[normalized] || 0) + 1;
+    }
+  });
+  
+  const maxFrequency = Math.max(...Object.values(wordFrequency), 0);
+  const repetitionRatio = maxFrequency / Math.max(words.length, 1);
+  
+  if (repetitionRatio > 0.3 && words.length > 10) {
+    return {
+      valid: false,
+      message: '⚠️ Your argument contains too much repetition. Please provide varied and meaningful content.'
+    };
+  }
+  
+  // 5. Check for nonsense characters (same character repeated 10+ times)
+  const nonsensePattern = /(.)\1{9,}/;
+  if (nonsensePattern.test(trimmed)) {
+    return {
+      valid: false,
+      message: '⚠️ Please provide a meaningful argument, not random characters.'
+    };
+  }
+  
+  // 6. Check for real English words (at least 5 words with 2+ letters)
+  const realWords = words.filter(word => /[a-zA-Z]{2,}/.test(word));
+  if (realWords.length < 5) {
+    return {
+      valid: false,
+      message: '⚠️ Please write a proper argument with real words in English.'
     };
   }
   
@@ -208,6 +254,21 @@ export async function studentSend(dom, state) {
     showToast(dom, validation.message, "error");
     return;
   }
+  
+  // ✅ Check if text is just copying the debate topic
+  const topicWords = state.topic.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const textWords = text.toLowerCase().split(/\s+/);
+  
+  if (topicWords.length > 3) {
+    const matchingWords = topicWords.filter(word => textWords.includes(word));
+    const topicSimilarity = matchingWords.length / topicWords.length;
+    
+    // If more than 70% of topic words appear in the argument, it's likely just copying
+    if (topicSimilarity > 0.7) {
+      showToast(dom, "⚠️ Please write your own argument, not just copy the debate topic.", "error");
+      return;
+    }
+  }
 
   stopTimer(dom, state);
 
@@ -249,9 +310,18 @@ addBubble(dom, state, "system", "⏳ Computer is thinking...");
 
 // Check if computer is starting first
 const isComputerStarting = state.turnIndex === 0 && !lastStudent;
+
+// 🎯 Detect if this is computer's FINAL argument (before summary rounds)
+// In a 6-turn debate (indices 0-5): turns 0-3 are arguments, 4-5 are summaries
+// Computer's final argument is at index 3 (if student starts) or index 2 (if computer starts)
+const isComputerFinalArgument = !isSummaryTurn(state.turnIndex) && 
+  ((state.studentStarts && state.turnIndex === 3) || 
+   (!state.studentStarts && state.turnIndex === 2));
+
 const reply = await sendToAI(dom, state, lastStudent, { 
   isSummary: isSummaryTurn(state.turnIndex),
-  isComputerStarting: isComputerStarting
+  isComputerStarting: isComputerStarting,
+  isComputerFinalArgument: isComputerFinalArgument
 });
 
   // remove last "thinking" system bubble if it's last
@@ -264,7 +334,22 @@ const reply = await sendToAI(dom, state, lastStudent, {
   // TTS - speak computer reply if autoSpeak is enabled
   if (reply && state.autoSpeak) {
     unlockTTS();
+    
+    // 🎯 Calculate estimated TTS duration (~150 words per minute)
+    const words = reply.split(/\s+/).length;
+    const estimatedTTSDuration = (words / 150) * 60 * 1000; // in milliseconds
+    const bufferTime = 3000; // 3 seconds buffer
+    const totalWaitTime = estimatedTTSDuration + bufferTime;
+    
+    console.log(`🔊 TTS: ${words} words, estimated ~${Math.round(totalWaitTime/1000)}s duration`);
+    
     setTimeout(() => speakText(reply, state.voiceURI), 200);
+    
+    // Store TTS wait time for Final Round check
+    state.lastTTSWaitTime = totalWaitTime;
+  } else {
+    // No TTS, set minimal wait time
+    state.lastTTSWaitTime = 2000;
   }
 
   const lastPair = state.feedbackTurns[state.feedbackTurns.length - 1];
@@ -277,15 +362,20 @@ const reply = await sendToAI(dom, state, lastStudent, {
     window.finalRoundTurnsRemaining--;
     console.log('🏁 Final Round turns remaining:', window.finalRoundTurnsRemaining);
     if (window.finalRoundTurnsRemaining <= 0) {
-      console.log('🏁 Final Round complete! Ending debate...');
+      console.log('🏁 Final Round complete! Waiting for TTS to finish...');
       addBubble(dom, state, "system", "🏁 Final Round complete!");
       
+      // 🎯 Use calculated TTS duration instead of fixed 20s
+      const waitTime = state.lastTTSWaitTime || 2000;
+      console.log(`🏁 Waiting ${Math.round(waitTime/1000)}s for TTS to complete...`);
+      
       setTimeout(() => {
+        console.log('🏁 TTS should be done, ending debate now');
         const endBtn = document.getElementById('endDebateBtn');
         if (endBtn) {
           endBtn.click();
         }
-      }, 20000);
+      }, waitTime);
       return;
     }
   }
