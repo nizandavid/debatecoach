@@ -1347,6 +1347,14 @@ body::after {
     padding-left: 0;
   }
 
+  .message-computer {
+    padding-left: 0;
+  }
+
+  .message-computer .message-inner {
+    max-width: calc(100% - 60px);
+  }
+
   .modal {
     padding: 30px 20px;
   }
