@@ -107,6 +107,14 @@ D.endSessionBtn?.addEventListener("click", () => {
   D.feedbackSection?.classList.remove("hidden");
 });
 
+// Re-attach Settings button listener
+const settingsBtn = document.getElementById('settingsBtn');
+if (settingsBtn) {
+  settingsBtn.addEventListener('click', () => {
+    openSettings();
+  });
+}
+
 /* ---------- Debate action buttons ---------- */
 D.resetBtn?.addEventListener("click", () => {
   unlockTTS();

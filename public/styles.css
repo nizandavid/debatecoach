@@ -2385,6 +2385,7 @@ body::after {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 24px 60px rgba(80, 40, 140, 0.25), 0 0 0 1px rgba(160, 120, 220, 0.12) !important;
+  position: relative;
 }
 
 /* Modal header */
@@ -2405,6 +2406,9 @@ body::after {
 }
 
 .settings-modal-new .close-modal {
+  position: absolute;
+  top: 14px;
+  right: 16px;
   background: rgba(120, 80, 180, 0.08);
   border: none;
   border-radius: 9px;
@@ -2418,6 +2422,7 @@ body::after {
   justify-content: center;
   transition: all 0.15s;
   line-height: 1;
+  z-index: 1;
 }
 
 .settings-modal-new .close-modal:hover {
@@ -3013,7 +3018,20 @@ div#helpModal.active {
 .card #downloadTranscriptBtn { 
   display: inline-flex !important; 
 }
-
+/* Hide Done button on mobile - X is enough */
+@media (max-width: 768px) {
+  #settingsModal .modal-footer,
+  #settingsModal button:contains("Done"),
+  .settings-modal-new button[onclick*="close"] {
+    display: none !important;
+  }
+  
+  /* Ensure X button is visible */
+  #settingsModal .close-settings,
+  #settingsModal .close-modal {
+    display: block !important;
+  }
+}
 /* SETTINGS */
 .settings-modal-new { max-width: 520px !important; max-height: 85vh !important; }
 .settings-section { padding: 16px !important; margin-bottom: 12px !important; }
